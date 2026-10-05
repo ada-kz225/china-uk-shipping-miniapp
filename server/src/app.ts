@@ -2,6 +2,7 @@ import Fastify, { type FastifyInstance } from "fastify";
 
 import type { AppConfig } from "./config/env.js";
 import { createDatabase } from "./db/database.js";
+import { runMigrations } from "./db/migrate.js";
 import { registerHealthRoute } from "./routes/health.js";
 
 export type BuildAppOptions = {
@@ -16,6 +17,7 @@ export async function buildApp(
     logger: options.logger ?? false
   });
   const database = createDatabase(options.config.sqliteDbPath);
+  runMigrations(database);
 
   app.addHook("onClose", async () => {
     database.close();

@@ -17,14 +17,14 @@
 
 ## 3. Core Data Model
 
-- `app_user`、`warehouse`：数据归属与中国仓地址组合；
-- `package`：国内包裹预报、到仓、归属与可合箱；
-- `shipment`、`shipment_package`：一次转运与 Package 锁定；
-- `address`：每次转运的英国收件地址快照；
-- `quote`、`payment`：最终费用快照与模拟付款尝试；
-- `tracking_event`：出库后的连续履约时间线；
-- `exception`：阻断、下一步与恢复目标；
-- `audit_log`：关键业务事实的内部追溯。
+- `users`、`warehouses`：数据归属与中国仓地址组合；
+- `packages`：国内包裹预报、到仓、归属与可合箱；
+- `shipments`、`shipment_packages`：一次转运与 Package 锁定；
+- `addresses`：每次转运的英国收件地址快照；
+- `quotes`、`payments`：最终费用快照与模拟付款尝试；
+- `tracking_events`：出库后的连续履约时间线；
+- `exceptions`：阻断、下一步与恢复目标；
+- `audit_logs`：关键业务事实的内部追溯。
 
 数据库以唯一索引、部分唯一索引、外键、事务与 version 防止重复预报、重复锁定和并发覆盖。
 

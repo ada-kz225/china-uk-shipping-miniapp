@@ -1,0 +1,12 @@
+# Internal working material. Do not publish in the public portfolio repository.
+/.internal/
+
+# Dependencies, local configuration and generated development data.
+node_modules/
+server/node_modules/
+server/data/*.sqlite
+server/data/*.sqlite-*
+.env
+server/.env
+miniprogram/project.private.config.json
+*.log

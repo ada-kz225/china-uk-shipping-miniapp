@@ -16,25 +16,6 @@ export function createDatabase(databasePath: string): SqliteDatabase {
     database.pragma("journal_mode = WAL");
   }
 
-  database.exec(
-    [
-      "CREATE TABLE IF NOT EXISTS app_metadata (",
-      "  key TEXT PRIMARY KEY,",
-      "  value TEXT NOT NULL,",
-      "  created_at TEXT NOT NULL",
-      ");"
-    ].join("\n")
-  );
-
-  database
-    .prepare(
-      [
-        "INSERT OR IGNORE INTO app_metadata (key, value, created_at)",
-        "VALUES (?, ?, ?)"
-      ].join(" ")
-    )
-    .run("schema_phase", "phase-0", new Date().toISOString());
-
   return database;
 }
 

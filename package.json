@@ -10,7 +10,10 @@
     "dev:server": "npm --workspace @china-uk-shipping/server run dev",
     "start:server": "npm --workspace @china-uk-shipping/server run start",
     "test:server": "npm --workspace @china-uk-shipping/server run test",
-    "check:server": "npm --workspace @china-uk-shipping/server run check"
+    "check:server": "npm --workspace @china-uk-shipping/server run check",
+    "db:init": "npm --workspace @china-uk-shipping/server run db:init",
+    "db:seed": "npm --workspace @china-uk-shipping/server run db:seed",
+    "db:reset": "npm --workspace @china-uk-shipping/server run db:reset"
   },
   "engines": {
     "node": ">=22"

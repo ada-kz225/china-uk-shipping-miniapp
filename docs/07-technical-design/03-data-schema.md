@@ -11,12 +11,12 @@
 | 金额 | `*_minor` 为整数；显示前按 `currency` 格式化。演示金额必须标识为模拟。 |
 | 重量 | `*_g` 为正整数；用户显示单位由展示层统一处理。 |
 | 枚举 | `status`、`state`、`source` 由服务端白名单校验；数据库用 `TEXT + CHECK`。 |
-| 并发 | `package.version` 与 `shipment.version` 在更新时比对；写成功递增。 |
+| 并发 | `packages.version` 与 `shipments.version` 在更新时比对；写成功递增。 |
 | 删除 | 核心履约实体不物理删除；草稿可取消，关联以 `released_at` 保留历史。 |
 
 ## 2. Tables
 
-### `app_user`
+### `users`（User）
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -26,7 +26,7 @@
 | display_name | TEXT | 否 | 最小展示名；不存真实姓名作为示例数据。 |
 | created_at / updated_at | TEXT | 是 | 服务端时间。 |
 
-### `warehouse`
+### `warehouses`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -39,12 +39,12 @@
 | is_active | INTEGER | 是 | 仅活动仓可返回地址。 |
 | created_at / updated_at | TEXT | 是 | 服务端时间。 |
 
-### `package`
+### `packages`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
 | id | TEXT PK | 是 | Package ID。 |
-| user_id | TEXT FK | 是 | 指向 `app_user.id`。 |
+| user_id | TEXT FK | 是 | 指向 `users.id`。 |
 | warehouse_id | TEXT FK | 是 | 目标中国仓。 |
 | domestic_tracking_number | TEXT | 是 | 国内运单号，UNIQUE；服务端 trim / 标准化后写入。 |
 | goods_description | TEXT | 否 | 最小商品说明。 |
@@ -57,7 +57,7 @@
 
 约束：`CHECK(goods_description IS NOT NULL OR order_proof_ref IS NOT NULL)`；`UNIQUE(domestic_tracking_number)`；`status` 必须为已定义 Package State。
 
-### `shipment`
+### `shipments`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -73,7 +73,7 @@
 
 约束：`UNIQUE(reference)`；已提交或后续状态必须有 reference；重量如存在必须大于 0。
 
-### `shipment_package`
+### `shipment_packages`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -86,7 +86,7 @@
 
 约束：`UNIQUE(shipment_id, package_id)`；部分唯一索引 `UNIQUE(package_id) WHERE released_at IS NULL`，从数据库层防止 Package 同时属于两个有效 Shipment。
 
-### `address`
+### `addresses`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -100,7 +100,7 @@
 
 约束：`UNIQUE(shipment_id)`。它是本次 Shipment 快照，不做 P1 地址簿。
 
-### `quote`
+### `quotes`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -118,7 +118,7 @@
 
 约束：重量大于 0；费用非负；`total_amount_minor = shipping_fee_minor + handling_fee_minor` 由服务端校验；创建后不可 UPDATE 金额或重量。
 
-### `payment`
+### `payments`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -135,7 +135,7 @@
 
 约束：一个 Shipment 只能有一条 `SUCCEEDED` Payment（部分唯一索引）；成功后不允许再创建成功支付。
 
-### `tracking_event`
+### `tracking_events`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -150,7 +150,7 @@
 
 约束：同一 Shipment 的阶段顺序由 TrackingService 校验；按 `occurred_at, created_at` 排序。
 
-### `exception`
+### `exceptions`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -172,7 +172,7 @@
 
 约束：`CHECK((package_id IS NOT NULL) != (shipment_id IS NOT NULL))`；同一实体同一时刻只允许一个阻塞 `OPEN` Exception，由服务端与部分唯一索引共同保证。
 
-### `audit_log`
+### `audit_logs`
 
 | Field | Type | Required | Meaning / constraint |
 | --- | --- | --- | --- |
@@ -190,14 +190,13 @@
 
 | Index / mechanism | Purpose |
 | --- | --- |
-| `package(domestic_tracking_number)` UNIQUE | 阻止重复预报。 |
-| `shipment(reference)` UNIQUE | 生成稳定且唯一的转运单号。 |
+| `packages(domestic_tracking_number)` UNIQUE | 阻止重复预报。 |
+| `shipments(reference)` UNIQUE | 生成稳定且唯一的转运单号。 |
 | `shipment_package(package_id) WHERE released_at IS NULL` UNIQUE | 阻止一个 Package 同时锁入多个有效 Shipment。 |
-| `package(user_id, status, updated_at)` | 支撑包裹筛选和列表。 |
-| `shipment(user_id, status, updated_at)` | 支撑进行中优先的转运列表。 |
-| `tracking_event(shipment_id, occurred_at)` | 支撑详情时间线。 |
-| `exception(package_id/shipment_id, status)` | 支撑阻塞校验与异常区块。 |
+| `packages(user_id, status, updated_at)` | 支撑包裹筛选和列表。 |
+| `shipments(user_id, status, updated_at)` | 支撑进行中优先的转运列表。 |
+| `tracking_events(shipment_id, occurred_at)` | 支撑详情时间线。 |
+| `exceptions(package_id/shipment_id, status)` | 支撑阻塞校验与异常区块。 |
 | `UPDATE ... WHERE id = ? AND version = ?` | 防止并发提交、取消或 Ops 事件覆盖。 |
 
 提交 Shipment、生成 Quote、确认支付、出库、创建/解决异常必须在单个数据库事务中更新事实、状态、关联与 AuditLog。SQLite 写入事务使用立即锁定策略；冲突时 API 返回可理解的中文提示，而不是静默覆盖。
-
