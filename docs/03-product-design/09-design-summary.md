@@ -17,7 +17,7 @@
 
 **8 个页面：7 个 P0 + 1 个 P1。**
 
-- P0：Home、Package List、Package Detail、Declare Package、Shipment List、Shipment Creation、Shipment Detail；
+- P0：Home、Package List、Package Detail、Declare Package、Shipment List、Shipment Creation、Shipment Detail；Shipment 提交后生成稳定 Reference；
 - P1：Profile / Settings。
 
 Quote / Payment、Tracking、Address、Exception 不拆成独立页面，均放入关联实体的上下文，避免不必要跳转。
@@ -29,7 +29,7 @@ Quote / Payment、Tracking、Address、Exception 不拆成独立页面，均放�
 | Home | 告诉用户当前最需要处理什么。 |
 | Package List | 让用户盘点 10–20 件 Package 的到仓、归属、可选性与异常。 |
 | Shipment Creation | 将多个可用 Package 明确形成一次 Shipment。 |
-| Shipment Detail | 回答“这次转运现在到底怎么样”，承接 Quote、Payment、Dispatch、Timeline 与 Exception。 |
+| Shipment Detail | 回答“这次转运现在到底怎么样”，以稳定 Reference 承接 Quote、Payment、Dispatch、Timeline 与 Exception。 |
 
 ## 4. Homepage 信息优先级
 
@@ -63,7 +63,7 @@ Exception 和待付款优先于一切普通信息；`PAID_AWAITING_DISPATCH` 属
 
 1. 获取 Warehouse 地址后，流程在外部电商下单处结束；不假装管理淘宝、拼多多下单。
 2. Package 的物理到仓与归属确认分为 `ARRIVED_PENDING_MATCH` 和 `READY_FOR_SHIPMENT`，用户不能自行跳过匹配。
-3. 多个 Package 只有在 Shipment 提交时才改变为 `IN_SHIPMENT`；草稿选择不提前锁定。
+3. 多个 Package 只有在 Shipment 提交时才改变为 `IN_SHIPMENT`；草稿选择不提前锁定，提交后生成稳定 Shipment Reference。
 4. Quote 是 Payment 的必要前置事实，但不被错误定义为 P01 的首要痛点。
 5. Payment 成功、实际 Dispatch 与最终 Delivered 是三个严格不同的 Shipment 事实。
 

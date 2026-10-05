@@ -26,7 +26,7 @@
 | State | User Meaning | What User Sees | Available Action | Next Expected Event |
 | --- | --- | --- | --- | --- |
 | `DRAFT` | 已开始准备本次 Shipment，尚未提交 | 已选 Package 数、未选可用 Package、地址是否完成 | 增删 Package；填写/修改地址；提交或放弃草稿 | 用户提交，或取消草稿 |
-| `SUBMITTED` | 已提交，等待 Warehouse 开始处理 | “已提交，等待仓库开始处理”；本次包含的 Package | 查看内容；在允许窗口内取消 / 撤回（Product Assumption） | `WAREHOUSE_PROCESSING` 或处理前 Exception |
+| `SUBMITTED` | 已提交，等待 Warehouse 开始处理 | “已提交，等待仓库开始处理”；稳定 Shipment Reference 与本次包含的 Package | 查看内容；在允许窗口内取消 / 撤回（Product Assumption） | `WAREHOUSE_PROCESSING` 或处理前 Exception |
 | `WAREHOUSE_PROCESSING` | Warehouse 正在检查、打包和称重 | “仓库正在处理”；当前处理阶段；可修改边界 | 当前通常无需操作；若有要求则按提示处理 | Quote 生成，或 Exception |
 | `AWAITING_PAYMENT` | 最终重量与 Quote 已生成，等待付款 | 计费重量、费用项、总价、Quote 状态 | 核对 Quote；发起 Payment | `PAYMENT_PROCESSING` |
 | `PAYMENT_PROCESSING` | 正在确认 Payment 结果 | “正在确认付款结果”；防止重复付款说明 | 等待结果；不要重复发起 Payment | 成功进入已付款待出库，失败回到待付款 |
@@ -62,7 +62,7 @@
 
 ## 状态数据边界
 
-- 所有用户文案应包含最近事件或更新时间（如有），但不伪装成实时数据；
+- 所有用户文案应包含稳定 Shipment Reference、最近事件或更新时间（如有），但不伪装成实时数据；
 - V1 中 Warehouse、Payment 与 Tracking Event 允许 Simulated，但状态转移顺序不能跳过；
 - 无外部事件时，应显示“尚无新事件”而非臆造下一步已发生；
 - 精确时效、航班、清关原因和承运商字段仍是 Product Assumption，不写成确定承诺。

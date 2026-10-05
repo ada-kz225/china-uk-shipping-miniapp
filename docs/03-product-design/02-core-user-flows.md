@@ -89,7 +89,7 @@ flowchart TD
     G --> H[确认已选 Package]
     H --> I[填写本次英国地址]
     I --> J[提交 Shipment]
-    J --> K[Shipment: SUBMITTED]
+    J --> K[Shipment: SUBMITTED and Reference generated]
     K --> L[已选 Package: IN_SHIPMENT]
 ```
 
@@ -98,8 +98,8 @@ flowchart TD
 | Entry | Package List 的 `可合箱` 筛选；Home 的 Package Overview。 |
 | User Goal | 从多个已归属的 Package 中选择本次要寄的组合，形成一个明确 Shipment。 |
 | User Actions | 筛选、勾选多个可用 Package；检查已选/未选数量；确认包含内容；填写本次英国地址；提交。加固、去包装等服务偏好属于 P1，不是此 P0 Flow 的必要步骤。 |
-| System Response | 只允许 `READY_FOR_SHIPMENT` Package 被选择；在草稿阶段展示选择但不改变 Package 最终归属；提交后生成一个 Shipment。 |
-| State Change | 创建 `Shipment: DRAFT`；提交后 `Shipment: SUBMITTED`，已选 `Package: READY_FOR_SHIPMENT → IN_SHIPMENT`。 |
+| System Response | 只允许 `READY_FOR_SHIPMENT` Package 被选择；在草稿阶段展示选择但不改变 Package 最终归属；提交后生成一个 Shipment 和稳定 Reference。 |
+| State Change | 创建 `Shipment: DRAFT`；提交后 `Shipment: SUBMITTED` 并生成 Reference，已选 `Package: READY_FOR_SHIPMENT → IN_SHIPMENT`。 |
 | Decision Point | 用户是否要等待更多 Package、排除部分 Package，或立即提交？这是用户决策，不由系统自动推荐。 |
 | Exception / Edge Case | 未到仓 / 待确认 Package 显示不可选原因；`EXCEPTION` Package 引导处理问题；`IN_SHIPMENT` Package 显示关联 Shipment，避免重复选择。无可用 Package 时不能创建 Shipment。 |
 | Exit | 用户获得已提交 Shipment，进入 Shipment Detail 了解仓库处理与后续状态。 |
@@ -124,7 +124,7 @@ flowchart TD
 | Entry | 用户已提交的 `Shipment: SUBMITTED`。 |
 | User Goal | 知道 Warehouse 正在处理什么，并在付款前查看最终重量和 Quote。 |
 | User Actions | 查看处理状态；Quote 就绪后核对计费重量、费用项和总价。 |
-| System Response | 将仓库处理、Quote 就绪与付款待办分开；在 V1 中以 Simulated Warehouse Event 产生最终重量与 Quote。 |
+| System Response | 将仓库处理、Quote 就绪与付款待办分开；在 V1 中以 Simulated Warehouse Event 产生最终重量与带费用依据的 Quote 快照。 |
 | State Change | `SUBMITTED → WAREHOUSE_PROCESSING → AWAITING_PAYMENT`；处理阻塞时进入 `EXCEPTION`。 |
 | Decision Point | Quote 是否已生成；生成后用户是否接受并进入 Payment。P01 支持用户会看重量与费用再付款，但不支持“价格一定不透明”。 |
 | Exception / Edge Case | 处理发现问题时，说明被影响的 Package / Shipment、当前无法继续的原因和用户下一步；不生成伪 Quote。 |

@@ -15,6 +15,8 @@
 | 7 | UK Address | 寄往哪里？ | 已提交后可查看 |
 | 8 | Processing Evidence | 照片或打包凭据 | P1；真实可用时才展示 |
 
+Shipment Reference 始终与 Current Status 一同展示，用于让用户辨识本次 Shipment、理解关联 Timeline，并在需要支持时提供上下文。它不是对真实承运商追踪单号的承诺。
+
 ### 状态优先于信息平铺
 
 - `AWAITING_PAYMENT`：Quote / Payment 是主任务，Timeline 降级为辅助信息。
@@ -57,7 +59,7 @@ Included Packages 默认展示：Package 数量、可辨识摘要和链接。用
 
 P01 没有将报价描述为主要痛点，因此这里的设计目标是**可核对**，而非复杂的价格教育：
 
-- 最终计费重量；
+- 稳定 Shipment Reference、最终计费重量；
 - 明确费用项和总价；
 - Quote 状态；
 - Payment 发起、处理中、成功或失败的事实；
