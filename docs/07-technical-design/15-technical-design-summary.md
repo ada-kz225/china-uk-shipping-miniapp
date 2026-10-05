@@ -3,7 +3,7 @@
 ## 1. 推荐技术栈
 
 - 微信原生小程序 + TypeScript；
-- Node.js 20 + TypeScript + Fastify；
+- Node.js 22+ + TypeScript + Fastify；
 - Zod 输入校验；
 - SQLite + Drizzle ORM / SQL migration；
 - Vitest + Fastify API tests；
@@ -118,4 +118,3 @@ Seed 提供主路径、状态展示和异常场景。内部 Command API 只在�
 **Ready for Development。**
 
 前提是后续实现遵守本技术设计：Mock 不绕过业务规则、用户可见文案保持中文、Prototype 保持不修改、并在每个业务阶段完成对应自动化与验收测试。
-

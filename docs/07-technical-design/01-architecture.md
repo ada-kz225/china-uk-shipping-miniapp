@@ -16,7 +16,7 @@
 | 层 | 选择 | 理由 |
 | --- | --- | --- |
 | Client | 微信原生小程序 + TypeScript + 官方 `wx` API | 与交付形态一致；页面少，不需要为了 MVP 引入复杂跨端框架。 |
-| API Server | Node.js 20 + TypeScript + Fastify | 单体服务即可承载 API、领域服务和 Demo Ops；Fastify 适合轻量、类型明确的 REST API。 |
+| API Server | Node.js 22+ + TypeScript + Fastify | 单体服务即可承载 API、领域服务和 Demo Ops；Fastify 适合轻量、类型明确的 REST API。 |
 | 输入校验 | Zod | 在 API 边界集中校验请求，避免把不可信输入带入领域服务。 |
 | Persistence | SQLite + Drizzle ORM / SQL migration | 单人作品集可本地一键运行；关系、唯一约束、事务和索引均适合本 MVP。迁移脚本保留后续切换 PostgreSQL 的路径。 |
 | 测试 | Vitest + Fastify inject API tests | 不依赖真实网络即可验证规则、接口与端到端验收场景。 |
@@ -124,4 +124,3 @@ flowchart LR
 - 不让小程序通过内部 Ops API 推进业务；
 - 不把 Prototype 的静态数据当作生产持久化方案；
 - 不为了“可扩展”提前拆分服务或增加消息基础设施。
-

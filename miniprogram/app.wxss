@@ -1,0 +1,24 @@
+page {
+  background: #f7f7f7;
+  color: #1f1f1f;
+  font-size: 32rpx;
+}
+
+.phase-zero-page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 48rpx 32rpx;
+}
+
+.phase-zero-title {
+  display: block;
+  font-size: 44rpx;
+  font-weight: 600;
+}
+
+.phase-zero-description {
+  display: block;
+  margin-top: 20rpx;
+  color: #666666;
+  font-size: 28rpx;
+}

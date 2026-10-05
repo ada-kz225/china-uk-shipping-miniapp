@@ -1,0 +1,34 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/packages/index",
+    "pages/shipments/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "中英转运",
+    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#333333",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/packages/index",
+        "text": "包裹"
+      },
+      {
+        "pagePath": "pages/shipments/index",
+        "text": "转运"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}
