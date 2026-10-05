@@ -1,0 +1,18 @@
+{
+  "name": "china-uk-shipping-miniapp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "中英个人集运微信小程序 Portfolio MVP",
+  "workspaces": [
+    "server"
+  ],
+  "scripts": {
+    "dev:server": "npm --workspace @china-uk-shipping/server run dev",
+    "start:server": "npm --workspace @china-uk-shipping/server run start",
+    "test:server": "npm --workspace @china-uk-shipping/server run test",
+    "check:server": "npm --workspace @china-uk-shipping/server run check"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
