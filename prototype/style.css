@@ -67,7 +67,7 @@ button {
 }
 
 .app-content {
-  padding: 16px 14px 24px;
+  padding: 16px 14px 120px;
 }
 
 .page-head {
@@ -391,16 +391,19 @@ button {
 }
 
 .sticky-action {
-  position: sticky;
+  position: fixed;
+  right: 50%;
   bottom: 72px;
-  z-index: 7;
-  margin: 14px -2px -8px;
+  z-index: 18;
+  width: min(430px, calc(100vw - 20px));
+  margin: 0;
   padding: 11px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgb(255 255 255 / 96%);
   box-shadow: 0 -8px 18px rgb(25 35 45 / 7%);
   backdrop-filter: blur(8px);
+  transform: translateX(50%);
 }
 
 .sticky-action .count-line {
@@ -605,9 +608,22 @@ button {
 }
 
 .included-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
   font-size: 13px;
+}
+
+.included-list li > span {
+  min-width: 0;
+  flex: 1;
+}
+
+.included-list li .mini-button {
+  flex: 0 0 auto;
 }
 
 .included-list li:last-child {
@@ -729,5 +745,10 @@ button {
     border: 1px solid #c9d1d7;
     border-bottom: 0;
     border-radius: 0 0 18px 18px;
+  }
+
+  .sticky-action {
+    bottom: 84px;
+    width: 410px;
   }
 }

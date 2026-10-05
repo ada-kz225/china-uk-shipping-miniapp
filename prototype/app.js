@@ -340,7 +340,7 @@
     return names[state.view] || "首页";
   }
 
-  function render() {
+  function render(options = {}) {
     pageTitle.textContent = getPageName();
     const views = {
       home: renderHome,
@@ -353,6 +353,12 @@
     };
     app.innerHTML = views[state.view]();
     renderTabbar();
+    if (options.preserveScroll) {
+      const restoreScroll = () => window.scrollTo(0, options.scrollY || 0);
+      if (typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(restoreScroll);
+      else restoreScroll();
+      return;
+    }
     window.scrollTo(0, 0);
   }
 
@@ -708,8 +714,8 @@
           <h2>提交后</h2>
           <p>将生成本次转运单号；已选包裹将锁定至本次转运；仓库后续处理、称重并生成最终报价。</p>
         </div>
-        <div class="button-row single"><button class="primary-button" type="submit">提交转运单</button></div>
       </form>
+      <div class="sticky-action"><button class="primary-button" type="submit" form="shipment-form">提交转运单</button></div>
     `;
   }
 
@@ -848,7 +854,7 @@
 
   function renderPaymentAction(item) {
     if (item.status === "AWAITING_PAYMENT") {
-      return `<section class="section"><button class="primary-button" data-action="pay" data-id="${item.id}">确认付款</button></section>`;
+      return `<div class="sticky-action"><button class="primary-button" data-action="pay" data-id="${item.id}">确认付款</button></div>`;
     }
     if (item.status === "PAYMENT_PROCESSING") {
       return `<section class="section"><button class="primary-button" disabled>正在确认付款结果</button></section>`;
@@ -995,7 +1001,7 @@
     } else {
       state.selectedPackageIds = state.selectedPackageIds.filter((item) => item !== id);
     }
-    render();
+    render({ preserveScroll: true, scrollY: window.scrollY || 0 });
   }
 
   function submitDeclaration(form) {
