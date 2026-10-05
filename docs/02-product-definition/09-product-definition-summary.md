@@ -33,10 +33,20 @@ P01 直接支持这是一个真实起始场景；长期居英华人与其他高�
 
 - Warehouse 地址与最小预报；
 - Package 列表、到仓/归属状态和 Package 选择；
-- Shipment 草稿、提交、英国收件地址和仓库处理状态；
+- Shipment 草稿、提交、稳定 Reference、英国收件地址和仓库处理状态；
 - 最终重量、Quote、模拟 Payment 与付款结果；
 - 已支付与已离仓的独立状态；
 - 最小国际履约阶段、签收与 Exception 下一步指引。
+
+### Supporting Operations P0
+
+- User / Package / Shipment 归属与访问范围；
+- 预报引用去重、重复操作保护，以及一个 Package 只能属于一个有效 Shipment 的约束；
+- Warehouse 收货、匹配、打包完成与最终计费重量的模拟事件；
+- Quote 快照、模拟 Payment 结果、Dispatch 闸门和 Tracking Event 阶段映射；
+- Exception 阻塞、解决与恢复，以及关键变化的 Operation Log。
+
+这些能力不增加用户页面，但用于确保用户可见的状态有一致、可追溯的产生路径；它们不构成完整 WMS 或真实外部集成。
 
 ## 6. P1 Capabilities
 
@@ -61,10 +71,10 @@ P01 直接支持这是一个真实起始场景；长期居英华人与其他高�
 User
  └─ N Package（预报 → 到仓 → 已归属 → 可合箱）
        ↓ 用户选择并提交
-    1 Shipment（处理 → Quote → Payment → 离仓 → 运输 → 签收）
+    1 Shipment（提交后生成稳定 Reference；处理 → Quote → Payment → 离仓 → 运输 → 签收）
 ```
 
-- 一个 Shipment 包含一个或多个 Package；
+- 一个 Shipment 包含一个或多个 Package，并在提交后获得稳定 Reference；
 - 一个 Package 同时只能归属一个有效 Shipment；
 - Package 解决“这件物品能否被本次选择”，Shipment 解决“本次寄送履约到哪里”。
 
@@ -74,7 +84,7 @@ User
 获得 Warehouse 地址
 → 预报/确认 Package 到仓与归属
 → 盘点并选择 Package
-→ 提交 Shipment
+→ 提交带稳定 Reference 的 Shipment
 → Warehouse 处理并产生 Quote
 → Payment 成功
 → 等待并确认 Dispatch

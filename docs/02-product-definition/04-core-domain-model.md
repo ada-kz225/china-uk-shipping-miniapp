@@ -15,6 +15,7 @@
 | Address | 用户的英国收件信息 | 为 Shipment 提供目的地 | V1 保存本次 Shipment 的地址快照；地址复用是 P1 Assumption。 |
 | Tracking Event | Shipment 履约过程中发生的可见事件 | 告知用户当前阶段、最近更新时间和下一步 | 外部事件的来源与准确性尚未确认。 |
 | Exception | 阻断或影响 Package / Shipment 的异常事项 | 解释影响、所需用户动作与处理进度 | V1 提供最小信息与引导，不做完整工单系统。 |
+| Operation Log | 对关键业务事实变化的内部记录 | 让状态、归属、重量、Quote、Payment、Dispatch 与 Exception 可追溯 | 不在用户端展示完整审计记录；用户只看到相关的状态与 Timeline。 |
 
 ## 关系模型
 
@@ -31,9 +32,11 @@ Shipment 1 ── 1 Quote
 Shipment 1 ── 0..1 Payment (V1 的单次付款模型)
 Shipment 1 ── N Tracking Event
 Shipment 1 ── 1 Address snapshot
+Shipment 1 ── N Operation Log
 
 Package 0..N Exception
 Shipment 0..N Exception
+Package 1 ── N Operation Log
 ```
 
 ### Package 与 Shipment 的核心关系
@@ -48,6 +51,7 @@ Shipment 0..N Exception
 
 - 一个 **User** 可以拥有多个 Package。
 - 一个 **Shipment** 必须包含一个或多个 Package。
+- 每个 Shipment 在提交后生成一个稳定 Reference，供用户在列表、详情、支持与后续事件上下文中辨识；它不代表已经获得真实承运商单号。
 - 一个 Package 在任一时刻只能属于一个**有效 Shipment**，避免同一实物被重复发运。
 - 用户在 Shipment 草稿中选择 Package 时，选择尚未最终锁定；提交后才形成有效归属。取消或在允许修改的窗口内撤回时，Package 可回到可选集合。具体窗口见 [07-business-rules.md](07-business-rules.md)。
 - V1 不支持拆分一个物理 Package 到多个 Shipment；如真实业务允许拆箱/重包，属于后续业务规则与能力。
@@ -71,6 +75,7 @@ P01 的真实行为正是先核对多个 Package 是否到仓，再决定本次�
 - 不允许将“已离仓”直接写成英国已签收；
 - Package 状态用于解释仓库前的归属与可选择性；Shipment 状态用于解释一次跨境履约；
 - Package 进入有效 Shipment 后，用户应以 Shipment 的履约时间线为主要追踪入口。
+- Operation Log 记录关键业务变化的来源、时间、前后值和原因（如适用）；用户 Timeline 是该内部记录的任务化视图，而不是完整审计后台。
 
 ## 模型假设与 V1 边界
 
@@ -81,3 +86,4 @@ P01 的真实行为正是先核对多个 Package 是否到仓，再决定本次�
 | 一个 Shipment 只有一个英国收件地址快照 | V1 Product Assumption；真实地址校验、改址规则待确认。 |
 | 仓库与物流事件可进入系统 | 作品集以 Simulated Event 表达；真实接入能力待确认。 |
 | Package 照片可关联 Package 或 Shipment | P01 观察支持照片价值；仓库是否稳定提供是 Product Assumption。 |
+| Operation Log 记录关键变更 | V1 P0 supporting capability；至少记录来源/操作方、时间、前后值和原因（如有）。 |

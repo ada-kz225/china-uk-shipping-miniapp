@@ -36,7 +36,7 @@
 
 | ID | 规则 | 依据与状态 |
 | --- | --- | --- |
-| BR-016 | Shipment 只有在 Payment 成功、无阻塞性 Exception 且 Warehouse 确认实际离仓后，才能进入 `DISPATCHED`。 | P01 行为支持付款后仍需等待离仓；精确出库前置条件为 Product Assumption。 |
+| BR-016 | Shipment 只有在 Payment 成功、打包/最终重量已确认、存在有效 Quote、无阻塞性 Exception 且 Warehouse 确认实际离仓后，才能进入 `DISPATCHED`。 | P01 行为支持付款后仍需等待离仓；精确出库前置条件为 Product Assumption。 |
 | BR-017 | `PAID_AWAITING_DISPATCH`、`DISPATCHED` 和 `DELIVERED` 必须是不同状态。 | P01 希望查询是否离仓；这是防止“付款/发货/签收”混淆的 V1 设计约束。 |
 | BR-018 | 每个 Tracking Event 至少关联时间、阶段和用户可理解的说明；若有信息来源，可一并标明。 | P01 使用多个追踪入口；真实事件字段、更新频率和来源可靠性为 Product Assumption。 |
 | BR-019 | `DELIVERED` 只能在英国末端承运商的签收事实进入系统后出现；国际运输、清关或英国派送不等于完成。 | V1 Product Assumption；真实签收事件接入方式待确认。 |
@@ -49,6 +49,11 @@
 | BR-021 | 阻塞性 Exception 阻止相关阶段继续，例如 Package 未匹配时不可加入 Shipment、出库阻塞时不可进入 `DISPATCHED`。 | V1 Product Assumption。 |
 | BR-022 | V1 不承诺自助解决全部 Exception；当需人工处理时，应提供上下文明确的支持指引，而不是只显示“请联系客服”。 | P01 在 Royal Mail 异常时通过电话客服解决；具体升级路径为 Product Assumption。 |
 | BR-023 | 任一用户可见状态都应回答“现在是什么”“下一步由谁做”“用户是否需要行动”。 | P01 的常规查询依赖客服；这是 V1 的核心信息透明度规则。 |
+| BR-024 | User 只能查看、选择或提交自己拥有的 Package 和 Shipment；Package 与 Shipment 的归属必须在服务端/模拟规则中校验。 | V1 Supporting Operations P0；具体认证实现为 Product Assumption。 |
+| BR-025 | 同一有效国内运单引用不得重复创建 Package；同一 Package 不得因重复提交而创建多个有效 Shipment。 | V1 Supporting Operations P0；去重键和幂等策略为 Product Assumption。 |
+| BR-026 | Shipment 提交时生成稳定 Reference；它用于用户辨识和关联后续事件，不等同于真实承运商单号。 | P01 使用过转运查询单号；Reference 格式和生成规则为 Product Assumption。 |
+| BR-027 | Quote 在进入 `AWAITING_PAYMENT` 时保留最终重量、费用项、总价、生成时间和来源/版本；Payment 成功后不得静默改写已接受 Quote。 | V1 Supporting Operations P0；改价、重报、补款和退款规则待确认。 |
+| BR-028 | Warehouse 收货、匹配、打包完成、Payment 结果、Dispatch、Tracking 与 Exception 的关键变化必须记录来源/操作方、时间、前后状态和值、原因（如适用）。 | V1 Supporting Operations P0；用户端只展示任务相关的状态和 Timeline。 |
 
 ## 规则待验证清单
 
