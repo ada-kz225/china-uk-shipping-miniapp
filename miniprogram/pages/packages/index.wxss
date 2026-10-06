@@ -34,6 +34,11 @@
   line-height: 64rpx;
 }
 
+.heading-button {
+  background: #ffffff;
+  color: #333333;
+}
+
 .declare-button {
   background: #1f1f1f;
   color: #ffffff;
@@ -69,6 +74,7 @@
   display: flex;
   flex-direction: column;
   gap: 20rpx;
+  padding-bottom: 160rpx;
 }
 
 .package-card {
@@ -82,6 +88,31 @@
   justify-content: space-between;
   gap: 20rpx;
   align-items: flex-start;
+}
+
+.card-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 14rpx;
+  min-width: 0;
+}
+
+.selection-mark {
+  flex: none;
+  width: 34rpx;
+  height: 34rpx;
+  margin-top: 2rpx;
+  border: 2rpx solid #9a9a9a;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 22rpx;
+  line-height: 30rpx;
+  text-align: center;
+}
+
+.selection-mark-active {
+  border-color: #1f1f1f;
+  background: #1f1f1f;
 }
 
 .tracking-number {
@@ -128,6 +159,13 @@
   color: #9f3629;
 }
 
+.unavailable-note {
+  display: block;
+  margin-top: 16rpx;
+  color: #9f3629;
+  font-size: 25rpx;
+}
+
 .feedback-state {
   margin-top: 80rpx;
   text-align: center;
@@ -143,4 +181,56 @@
   margin: 24rpx auto 0;
   background: #ffffff;
   color: #333333;
+}
+
+.consolidation-entry {
+  position: fixed;
+  right: 32rpx;
+  bottom: 132rpx;
+  left: 32rpx;
+}
+
+.primary-button,
+.selection-create-button {
+  background: #1f1f1f;
+  color: #ffffff;
+  font-size: 30rpx;
+}
+
+.selection-bottom-bar {
+  position: fixed;
+  right: 0;
+  bottom: 100rpx;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 20rpx 32rpx;
+  border-top: 1rpx solid #dddddd;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.selection-count,
+.selection-hint {
+  display: block;
+}
+
+.selection-count {
+  color: #1f1f1f;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.selection-hint {
+  margin-top: 6rpx;
+  color: #666666;
+  font-size: 24rpx;
+}
+
+.selection-create-button {
+  flex: none;
+  width: 220rpx;
+  margin: 0;
 }

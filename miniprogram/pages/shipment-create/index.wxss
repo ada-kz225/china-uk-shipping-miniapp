@@ -1,0 +1,157 @@
+@import "../../app.wxss";
+
+.create-page {
+  min-height: 100vh;
+  padding: 32rpx 32rpx 180rpx;
+  box-sizing: border-box;
+}
+
+.create-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.summary-card,
+.address-card,
+.shipment-summary,
+.package-section {
+  padding: 24rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+}
+
+.section-title {
+  display: block;
+  color: #1f1f1f;
+  font-size: 31rpx;
+  font-weight: 600;
+}
+
+.summary-count {
+  display: block;
+  margin-top: 14rpx;
+  color: #333333;
+  font-size: 29rpx;
+}
+
+.unselected-hint {
+  display: block;
+  margin-top: 12rpx;
+  color: #666666;
+  font-size: 26rpx;
+}
+
+.package-section {
+  padding: 0 24rpx;
+}
+
+.selected-package-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #e8e8e8;
+}
+
+.selected-package-row:last-child {
+  border-bottom: 0;
+}
+
+.selected-package-info {
+  min-width: 0;
+}
+
+.tracking-number,
+.package-description {
+  display: block;
+}
+
+.tracking-number {
+  color: #333333;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.package-description {
+  margin-top: 8rpx;
+  color: #666666;
+  font-size: 26rpx;
+}
+
+.remove-button {
+  flex: none;
+  margin: 0;
+  padding: 0 8rpx;
+  color: #9f3629;
+  background: transparent;
+  font-size: 27rpx;
+}
+
+.field-group {
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #e8e8e8;
+}
+
+.field-group-last {
+  border-bottom: 0;
+}
+
+.field-label {
+  display: block;
+  color: #333333;
+  font-size: 29rpx;
+}
+
+.field-input,
+.field-textarea {
+  width: 100%;
+  margin-top: 16rpx;
+  color: #1f1f1f;
+  font-size: 29rpx;
+  box-sizing: border-box;
+}
+
+.field-textarea {
+  min-height: 100rpx;
+}
+
+.shipment-summary text:last-child {
+  display: block;
+  margin-top: 14rpx;
+  color: #555555;
+  font-size: 27rpx;
+  line-height: 1.55;
+}
+
+.cancel-button {
+  margin: 0;
+  background: transparent;
+  color: #9f3629;
+  font-size: 28rpx;
+}
+
+.submit-bar {
+  position: fixed;
+  right: 0;
+  bottom: 100rpx;
+  left: 0;
+  padding: 20rpx 32rpx;
+  border-top: 1rpx solid #dddddd;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.submit-button {
+  background: #1f1f1f;
+  color: #ffffff;
+  font-size: 32rpx;
+}
+
+.feedback-state {
+  margin-top: 100rpx;
+  color: #666666;
+  font-size: 28rpx;
+  text-align: center;
+}

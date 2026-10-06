@@ -1,6 +1,6 @@
 import { environmentConfig } from "../config/env";
 
-type HttpMethod = "GET" | "POST";
+type HttpMethod = "GET" | "POST" | "DELETE";
 
 export type ApiErrorPayload = {
   error?: {
@@ -58,6 +58,9 @@ export const apiClient = {
   },
   post<T>(path: string, data?: unknown): Promise<T> {
     return request<T>("POST", path, data);
+  },
+  delete<T>(path: string): Promise<T> {
+    return request<T>("DELETE", path);
   }
 };
 

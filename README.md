@@ -2,9 +2,9 @@
 
 一个从 0 到 1 设计并实现的个人 Portfolio MVP，面向需要从中国寄送多个包裹到英国的个人用户。项目文档完整保留了产品研究、用户验证、产品定义、交互设计、PRD、可点击原型与技术设计过程。
 
-> 当前阶段：**Development — Phase 2：Package Management**
+> 当前阶段：**Development — Phase 3：Shipment Consolidation**
 >
-> 当前已完成 Package 预报、列表、详情、状态说明与受保护的 Mock Ops 状态推进。Shipment、报价、付款、物流、异常工作流与首页数据仍未开始实现。
+> 当前已完成多 Package 选择、Shipment 草稿、英国地址、提交与原子锁定。报价、付款、物流、异常工作流与首页数据仍未开始实现。
 
 ## 当前能力
 
@@ -18,7 +18,10 @@
 - Package 用户 API：预报、列表、状态筛选与详情；
 - 仅开发 / 演示环境可用的受保护 Mock Ops Package API；
 - 小程序 Package 列表、详情、预报页，均使用真实后端 API；
-- Vitest 健康检查、数据库约束、Package Service 与 API 测试；
+- Shipment 草稿、英国地址快照、提交、取消草稿与稳定转运单号；
+- Package 资格校验与提交时的原子锁定；
+- Shipment 用户 API、列表、详情、创建转运单页面；
+- Vitest 健康检查、数据库约束、Package / Shipment Service 与 API 测试；
 - 小程序 API Client 与微信官方 TypeScript API 类型声明。
 
 ## 项目结构
@@ -27,13 +30,13 @@
 china-uk-shipping-miniapp/
 ├── miniprogram/                 # 正式微信小程序代码
 │   ├── config/                  # 小程序开发 / 测试环境配置
-│   ├── services/                # 统一 API Client 与 Package API
-│   └── pages/                   # 首页、Package、转运与 Package 子页面
+│   ├── services/                # 统一 API Client、Package 与 Shipment API
+│   └── pages/                   # 首页、包裹、转运与核心详情 / 创建页面
 ├── server/                      # Fastify API 服务
 │   ├── src/
 │   │   ├── config/              # Zod 环境配置
 │   │   ├── db/                  # SQLite 连接、迁移、初始化与 Seed
-│   │   ├── routes/              # Health、Package 与开发期 Mock Ops 路由
+│   │   ├── routes/              # Health、Package、Shipment 与开发期 Mock Ops 路由
 │   │   ├── services/            # 领域服务与状态机入口
 │   │   ├── domain/              # 状态码、领域类型与状态机
 │   │   ├── presenters/          # 中文用户 DTO 映射
@@ -108,7 +111,7 @@ npm run db:seed
 CONFIRM_DB_RESET=1 npm run db:reset
 ```
 
-Phase 1 的 Seed 使用虚构用户、地址、运单、金额与时间。它建立 19 件 Package、6 张不同阶段的 Shipment、Quote、Payment Attempt、Tracking Event、Exception 与 Audit Log，供后续页面和业务服务开发使用。
+Seed 使用虚构用户、地址、运单、金额与时间。它建立 19 件 Package、6 张不同阶段的 Shipment、Quote、Payment Attempt、Tracking Event、Exception 与 Audit Log，供 Package 和 Shipment 场景开发使用。
 
 ## 打开微信小程序
 
@@ -128,7 +131,6 @@ Package 页会请求开发环境 API。当前默认地址为 `http://127.0.0.1:3
 
 以下能力已在 PRD 与技术设计中定义，但明确留在后续 Phase：
 
-- Shipment 草稿、合箱、地址、锁定与提交 API；
 - Quote、模拟付款和出库闸门业务逻辑；
 - 国际运输、清关、英国派送与签收业务逻辑；
 - Exception 工作流，以及 Shipment / Quote / Payment / Tracking 的 Mock Ops；

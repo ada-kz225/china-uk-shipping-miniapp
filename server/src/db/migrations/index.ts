@@ -1,4 +1,8 @@
 import { initialSchemaMigration } from "./001-initial-schema.js";
+import { shipmentDraftPackagesMigration } from "./002-shipment-draft-packages.js";
 import type { Migration } from "./types.js";
 
-export const migrations: Migration[] = [initialSchemaMigration];
+export const migrations: Migration[] = [
+  initialSchemaMigration,
+  shipmentDraftPackagesMigration
+];

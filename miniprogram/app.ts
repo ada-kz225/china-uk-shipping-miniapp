@@ -3,7 +3,8 @@ import { healthApi } from "./services/api";
 
 App<IAppOption>({
   globalData: {
-    apiBaseUrl: environmentConfig.apiBaseUrl
+    apiBaseUrl: environmentConfig.apiBaseUrl,
+    resetPackageSelection: false
   },
   onLaunch() {
     void healthApi().catch(() => {

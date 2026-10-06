@@ -1,0 +1,72 @@
+<view class="create-page">
+  <view wx:if="{{isLoading}}" class="feedback-state">正在加载。</view>
+  <view wx:elif="{{errorMessage}}" class="feedback-state">{{errorMessage}}</view>
+
+  <view wx:elif="{{shipment}}" class="create-content">
+    <view class="summary-card">
+      <text class="section-title">已选包裹</text>
+      <text class="summary-count">本次共 {{shipment.packageCount}} 件包裹</text>
+      <text wx:if="{{shipment.unselectedReadyPackageCount > 0}}" class="unselected-hint">
+        还有 {{shipment.unselectedReadyPackageCount}} 件可合箱包裹未加入本次转运
+      </text>
+    </view>
+
+    <view class="package-section">
+      <view
+        wx:for="{{shipment.packages}}"
+        wx:key="id"
+        class="selected-package-row"
+      >
+        <view class="selected-package-info">
+          <text class="tracking-number">{{item.domesticTrackingNumber}}</text>
+          <text class="package-description">{{item.description}}</text>
+        </view>
+        <button
+          class="remove-button"
+          data-id="{{item.id}}"
+          bindtap="onRemovePackageTap"
+        >
+          移除
+        </button>
+      </view>
+    </view>
+
+    <view class="address-card">
+      <text class="section-title">英国收货地址</text>
+      <view class="field-group">
+        <text class="field-label">收件人</text>
+        <input class="field-input" data-field="recipientName" value="{{address.recipientName}}" placeholder="请输入收件人姓名" bindinput="onAddressInput" />
+      </view>
+      <view class="field-group">
+        <text class="field-label">联系电话</text>
+        <input class="field-input" data-field="phone" value="{{address.phone}}" placeholder="请输入英国联系电话" bindinput="onAddressInput" />
+      </view>
+      <view class="field-group">
+        <text class="field-label">邮编</text>
+        <input class="field-input" data-field="postcode" value="{{address.postcode}}" placeholder="请输入邮编" bindinput="onAddressInput" />
+      </view>
+      <view class="field-group field-group-last">
+        <text class="field-label">详细地址</text>
+        <textarea class="field-textarea" data-field="addressLine" value="{{address.addressLine}}" placeholder="请输入详细地址" auto-height="true" bindinput="onAddressInput" />
+      </view>
+    </view>
+
+    <view class="shipment-summary">
+      <text class="section-title">转运摘要</text>
+      <text>提交后，已选包裹将加入本次转运单，仓库将开始处理。</text>
+    </view>
+
+    <button class="cancel-button" bindtap="onCancelDraftTap">取消本次转运</button>
+  </view>
+
+  <view wx:if="{{shipment && !isLoading && !errorMessage}}" class="submit-bar">
+    <button
+      class="submit-button"
+      loading="{{isSubmitting}}"
+      disabled="{{isSubmitting}}"
+      bindtap="onSubmitTap"
+    >
+      {{isSubmitting ? '正在提交' : '提交转运单'}}
+    </button>
+  </view>
+</view>

@@ -19,6 +19,8 @@ export type PackageDto = {
   arrivedAt: string | null;
   weightG: number | null;
   shipmentReference: string | null;
+  isEligibleForShipment: boolean;
+  selectionReason: string | null;
   createdAt: string;
   updatedAt: string;
   exception: {

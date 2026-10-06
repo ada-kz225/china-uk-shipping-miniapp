@@ -5,6 +5,7 @@ import {
   type PackageDto,
   type PackageFilter
 } from "../../services/packages";
+import { createShipmentDraft } from "../../services/shipments";
 
 type FilterOption = {
   key: PackageFilter;
@@ -14,6 +15,7 @@ type FilterOption = {
 type PackageCard = PackageDto & {
   arrivedAtDisplay: string;
   weightDisplay: string;
+  isSelected?: boolean;
 };
 
 const filters: FilterOption[] = [
@@ -31,10 +33,24 @@ Page({
     selectedFilter: "all" as PackageFilter,
     packages: [] as PackageCard[],
     isLoading: false,
-    errorMessage: ""
+    errorMessage: "",
+    isSelectionMode: false,
+    selectedPackageIds: [] as string[],
+    readyPackageCount: 0,
+    isCreatingShipment: false
   },
 
   onShow() {
+    const app = getApp<IAppOption>();
+
+    if (app.globalData.resetPackageSelection) {
+      this.setData({
+        isSelectionMode: false,
+        selectedPackageIds: []
+      });
+      app.globalData.resetPackageSelection = false;
+    }
+
     this.loadPackages();
   },
 
@@ -43,6 +59,10 @@ Page({
   },
 
   onFilterTap(event: { currentTarget: { dataset: { filter: PackageFilter } } }) {
+    if (this.data.isSelectionMode) {
+      return;
+    }
+
     const filter = event.currentTarget.dataset.filter;
 
     if (filter === this.data.selectedFilter) {
@@ -59,10 +79,93 @@ Page({
     });
   },
 
+  onCardTap(event: { currentTarget: { dataset: { id: string } } }) {
+    if (this.data.isSelectionMode) {
+      this.onSelectionPackageTap(event);
+      return;
+    }
+
+    this.onPackageTap(event);
+  },
+
   onDeclareTap() {
     wx.navigateTo({
       url: "/pages/package-declare/index"
     });
+  },
+
+  onStartConsolidation() {
+    this.setData({
+      isSelectionMode: true,
+      selectedPackageIds: [],
+      selectedFilter: "all"
+    });
+    this.loadPackages();
+  },
+
+  onExitSelection() {
+    this.setData({
+      isSelectionMode: false,
+      selectedPackageIds: []
+    });
+    this.applySelectionToCards();
+  },
+
+  onSelectionPackageTap(event: {
+    currentTarget: { dataset: { id: string } };
+  }) {
+    const packageId = event.currentTarget.dataset.id;
+    const item = this.data.packages.find((candidate) => candidate.id === packageId);
+
+    if (!item) {
+      return;
+    }
+
+    if (!item.isEligibleForShipment) {
+      wx.showToast({
+        title: item.selectionReason ?? "该包裹暂不可选。",
+        icon: "none"
+      });
+      return;
+    }
+
+    const isSelected = this.data.selectedPackageIds.includes(packageId);
+    const selectedPackageIds = isSelected
+      ? this.data.selectedPackageIds.filter((id) => id !== packageId)
+      : [...this.data.selectedPackageIds, packageId];
+
+    this.setData({ selectedPackageIds });
+    this.applySelectionToCards();
+  },
+
+  async onCreateShipmentTap() {
+    if (this.data.selectedPackageIds.length === 0) {
+      wx.showToast({ title: "请至少选择 1 件可合箱包裹。", icon: "none" });
+      return;
+    }
+
+    if (this.data.isCreatingShipment) {
+      return;
+    }
+
+    this.setData({ isCreatingShipment: true });
+
+    try {
+      const shipment = await createShipmentDraft(this.data.selectedPackageIds);
+      wx.navigateTo({
+        url: "/pages/shipment-create/index?id=" + encodeURIComponent(shipment.id)
+      });
+    } catch (error) {
+      wx.showToast({
+        title:
+          error instanceof ApiError
+            ? error.message
+            : "暂未创建成功，请重试。",
+        icon: "none"
+      });
+    } finally {
+      this.setData({ isCreatingShipment: false });
+    }
   },
 
   onRetryTap() {
@@ -77,12 +180,27 @@ Page({
 
     try {
       const packages = await listPackages(this.data.selectedFilter);
+      const selectableIds = new Set(
+        packages
+          .filter((item) => item.isEligibleForShipment)
+          .map((item) => item.id)
+      );
+      const selectedPackageIds = this.data.isSelectionMode
+        ? this.data.selectedPackageIds.filter((id) => selectableIds.has(id))
+        : this.data.selectedPackageIds;
+
       this.setData({
-        packages: packages.map(toPackageCard)
+        packages: packages.map(toPackageCard),
+        selectedPackageIds,
+        readyPackageCount: packages.filter(
+          (item) => item.isEligibleForShipment
+        ).length
       });
+      this.applySelectionToCards();
     } catch (error) {
       this.setData({
         packages: [],
+        readyPackageCount: 0,
         errorMessage:
           error instanceof ApiError
             ? error.message
@@ -95,6 +213,15 @@ Page({
         wx.stopPullDownRefresh();
       }
     }
+  },
+
+  applySelectionToCards() {
+    this.setData({
+      packages: this.data.packages.map((item) => ({
+        ...item,
+        isSelected: this.data.selectedPackageIds.includes(item.id)
+      }))
+    });
   }
 });
 

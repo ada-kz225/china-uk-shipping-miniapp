@@ -37,6 +37,17 @@ export type Shipment = {
   updatedAt: string;
 };
 
+export type Address = {
+  id: string;
+  userId: string;
+  recipientName: string;
+  phone: string;
+  postcode: string;
+  addressLine: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Quote = {
   id: string;
   shipmentId: string;
