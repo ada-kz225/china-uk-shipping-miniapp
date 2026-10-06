@@ -18,6 +18,30 @@
       <button wx:if="{{shipment.status === 'DRAFT'}}" class="draft-button" bindtap="onContinueDraftTap">继续完善本次转运</button>
     </view>
 
+    <view wx:if="{{shipment.activeException}}" class="information-card exception-card">
+      <text class="section-title">需要处理的问题</text>
+      <view class="exception-row">
+        <text class="field-label">发生什么</text>
+        <text>{{shipment.activeException.title}}：{{shipment.activeException.description}}</text>
+      </view>
+      <view class="exception-row">
+        <text class="field-label">影响什么</text>
+        <text>{{shipment.activeException.impact}}</text>
+      </view>
+      <view class="exception-row">
+        <text class="field-label">你需要做什么</text>
+        <text>{{shipment.activeException.requiredAction}}</text>
+      </view>
+      <view class="exception-row">
+        <text class="field-label">当前进度</text>
+        <text>{{shipment.activeException.progress}}</text>
+      </view>
+      <view class="exception-row">
+        <text class="field-label">需要帮助</text>
+        <text>{{shipment.activeException.support}}</text>
+      </view>
+    </view>
+
     <view wx:if="{{shipment.trackingEventsDisplay.length > 0}}" class="information-card timeline-card">
       <view class="timeline-heading">
         <text class="section-title">运输进度</text>

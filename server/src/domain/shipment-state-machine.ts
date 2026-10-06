@@ -81,3 +81,47 @@ export function validateShipmentStatusTransition(
 
   return transition.to;
 }
+
+const shipmentStatesThatCanBeBlocked = [
+  ShipmentStatus.SUBMITTED,
+  ShipmentStatus.WAREHOUSE_PROCESSING,
+  ShipmentStatus.AWAITING_PAYMENT,
+  ShipmentStatus.PAYMENT_PROCESSING,
+  ShipmentStatus.PAID_AWAITING_DISPATCH,
+  ShipmentStatus.DISPATCHED,
+  ShipmentStatus.INTERNATIONAL_TRANSIT,
+  ShipmentStatus.CUSTOMS_CLEARANCE,
+  ShipmentStatus.UK_LAST_MILE
+];
+
+export function validateShipmentExceptionRaise(
+  currentStatus: ShipmentStatus
+): ShipmentStatus {
+  if (!shipmentStatesThatCanBeBlocked.includes(currentStatus)) {
+    throw new AppError(
+      "INVALID_EXCEPTION_RESOLUTION",
+      409,
+      "当前转运单状态不支持创建需要处理的问题。"
+    );
+  }
+
+  return ShipmentStatus.EXCEPTION;
+}
+
+export function validateShipmentExceptionResolution(
+  currentStatus: ShipmentStatus,
+  resumeStatus: ShipmentStatus
+): ShipmentStatus {
+  if (
+    currentStatus !== ShipmentStatus.EXCEPTION ||
+    !shipmentStatesThatCanBeBlocked.includes(resumeStatus)
+  ) {
+    throw new AppError(
+      "INVALID_EXCEPTION_RESOLUTION",
+      409,
+      "当前转运单不能恢复到记录的业务状态。"
+    );
+  }
+
+  return resumeStatus;
+}

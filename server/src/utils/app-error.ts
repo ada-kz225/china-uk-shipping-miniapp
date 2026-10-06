@@ -23,7 +23,13 @@ export class AppError extends Error {
       | "PAYMENT_REQUIRED"
       | "DISPATCH_NOT_ALLOWED"
       | "TRACKING_TRANSITION_NOT_ALLOWED"
-      | "SHIPMENT_ALREADY_DELIVERED",
+      | "SHIPMENT_ALREADY_DELIVERED"
+      | "EXCEPTION_ALREADY_OPEN"
+      | "EXCEPTION_NOT_FOUND"
+      | "EXCEPTION_ALREADY_RESOLVED"
+      | "INVALID_EXCEPTION_RESOLUTION"
+      | "ENTITY_NOT_FOUND"
+      | "WORKFLOW_BLOCKED_BY_EXCEPTION",
     public readonly statusCode: number,
     message: string,
     public readonly fieldErrors: FieldError[] = []

@@ -214,6 +214,20 @@
   color: #2e6134;
 }
 
+.exception-card {
+  border: 1rpx solid #e7c8c3;
+}
+
+.exception-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-top: 20rpx;
+  color: #4d3733;
+  font-size: 28rpx;
+  line-height: 1.55;
+}
+
 .package-row {
   display: flex;
   align-items: center;

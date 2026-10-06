@@ -61,8 +61,8 @@
       <view wx:if="{{item.shipmentReference}}" class="relation-note">
         已关联转运单：{{item.shipmentReference}}
       </view>
-      <view wx:if="{{item.exception}}" class="exception-note">
-        {{item.exception.title}}
+      <view wx:if="{{item.activeException}}" class="exception-note">
+        {{item.activeException.title}}
       </view>
       <view wx:if="{{isSelectionMode && !item.isEligibleForShipment}}" class="unavailable-note">
         不可选：{{item.selectionReason}}

@@ -98,8 +98,8 @@ export class TrackingService {
       }
 
       if (this.exceptionRepository.findOpenByShipmentId(shipment.id)?.isBlocking) {
-        throw new AppError(
-          "TRACKING_TRANSITION_NOT_ALLOWED",
+      throw new AppError(
+          "WORKFLOW_BLOCKED_BY_EXCEPTION",
           409,
           "当前转运单存在需要处理的问题，暂不能更新运输进度。"
         );

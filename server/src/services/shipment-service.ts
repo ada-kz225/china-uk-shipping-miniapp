@@ -7,7 +7,8 @@ import type {
   Quote,
   Shipment,
   ShipmentStatus,
-  TrackingEvent
+  TrackingEvent,
+  DomainException
 } from "../domain/index.js";
 import {
   PackageStatus,
@@ -46,6 +47,7 @@ export type ShipmentDetails = ShipmentWithPackages & {
   quote: Quote | undefined;
   latestPayment: Payment | undefined;
   trackingEvents: TrackingEvent[];
+  activeException: DomainException | undefined;
 };
 
 const historyStatuses = [
@@ -102,7 +104,8 @@ export class ShipmentService {
       readyPackageCount: this.shipmentRepository.countReadyPackagesForUser(userId),
       quote: this.quoteRepository.findByShipmentId(entity.id),
       latestPayment: this.paymentRepository.findLatestByShipmentId(entity.id),
-      trackingEvents: this.trackingRepository.listByShipmentId(entity.id)
+      trackingEvents: this.trackingRepository.listByShipmentId(entity.id),
+      activeException: this.exceptionRepository.findOpenByShipmentId(entity.id)
     };
   }
 
@@ -269,7 +272,7 @@ export class ShipmentService {
 
       if (this.exceptionRepository.findOpenByShipmentId(shipment.id)?.isBlocking) {
         throw new AppError(
-          "INVALID_SHIPMENT_STATE",
+          "WORKFLOW_BLOCKED_BY_EXCEPTION",
           409,
           "当前转运单存在需要处理的问题，暂不能开始仓库处理。"
         );

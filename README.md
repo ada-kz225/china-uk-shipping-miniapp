@@ -2,9 +2,9 @@
 
 一个从 0 到 1 设计并实现的个人 Portfolio MVP，面向需要从中国寄送多个包裹到英国的个人用户。项目文档完整保留了产品研究、用户验证、产品定义、交互设计、PRD、可点击原型与技术设计过程。
 
-> 当前阶段：**Development — Phase 5：Dispatch + Tracking**
+> 当前阶段：**Development — Phase 6：Exception Handling**
 >
-> 当前已完成多 Package 选择、Shipment 草稿、英国地址、提交与原子锁定，以及模拟仓库处理、最终重量、Quote Snapshot、模拟付款、实际出库事实与阶段级运输 Timeline。Exception 工作流与首页数据仍未开始实现。
+> 当前已完成多 Package 选择、Shipment 草稿、英国地址、提交与原子锁定，以及模拟仓库处理、最终重量、Quote Snapshot、模拟付款、实际出库事实、阶段级运输 Timeline，以及阻断、恢复均受状态机约束的 Exception 工作流。首页数据仍未开始实现。
 
 ## 当前能力
 
@@ -27,6 +27,8 @@
 - Dispatch Service 出库闸门：成功付款不等于实际离仓；
 - 受保护 Mock Ops 可按顺序模拟出库、国际运输、清关、英国派送和签收；
 - Shipment Detail 显示中文阶段级运输 Timeline，`DELIVERED` 才是完整履约结束；
+- Package / Shipment Exception Service：保存中断前状态、阻断后续动作、由 Mock Ops 解决后恢复；
+- Package 与 Shipment 详情均展示中文异常卡片：发生什么、影响、下一步、当前进度与支持信息；
 - Vitest 健康检查、数据库约束、Package / Shipment Service 与 API 测试；
 - 小程序 API Client 与微信官方 TypeScript API 类型声明。
 
@@ -137,7 +139,6 @@ Package 页会请求开发环境 API。当前默认地址为 `http://127.0.0.1:3
 
 以下能力已在 PRD 与技术设计中定义，但明确留在后续 Phase：
 
-- Exception 工作流；
 - 首页任务聚合与状态刷新；
 - 真实微信登录、真实微信支付、真实仓库 / 物流 API。
 

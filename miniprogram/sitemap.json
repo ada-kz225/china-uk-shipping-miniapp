@@ -1,4 +1,9 @@
 {
   "desc": "Phase 0 项目初始化",
-  "rules": []
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    }
+  ]
 }

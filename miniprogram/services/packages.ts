@@ -23,11 +23,13 @@ export type PackageDto = {
   selectionReason: string | null;
   createdAt: string;
   updatedAt: string;
-  exception: {
+  activeException: {
     title: string;
     description: string;
     impact: string;
     requiredAction: string;
+    progress: string;
+    support: string;
   } | null;
 };
 

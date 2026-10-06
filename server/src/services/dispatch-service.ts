@@ -83,7 +83,7 @@ export class DispatchService {
 
     if (this.exceptionRepository.findOpenByShipmentId(shipment.id)?.isBlocking) {
       throw new AppError(
-        "DISPATCH_NOT_ALLOWED",
+        "WORKFLOW_BLOCKED_BY_EXCEPTION",
         409,
         "当前转运单存在需要处理的问题，暂不能出库。"
       );

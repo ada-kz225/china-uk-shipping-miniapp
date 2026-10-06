@@ -6,6 +6,7 @@ import { QuoteService } from "../services/quote-service.js";
 import { DispatchService } from "../services/dispatch-service.js";
 import { ShipmentService } from "../services/shipment-service.js";
 import { TrackingService } from "../services/tracking-service.js";
+import { ExceptionService } from "../services/exception-service.js";
 import { TrackingEventType } from "../domain/index.js";
 import { AppError } from "../utils/app-error.js";
 import { verifyDemoOpsKey } from "./request-context.js";
@@ -44,6 +45,7 @@ type MockShipmentRouteOptions = {
   paymentService: PaymentService;
   dispatchService: DispatchService;
   trackingService: TrackingService;
+  exceptionService: ExceptionService;
   demoOpsKey: string;
 };
 
@@ -122,6 +124,33 @@ export async function registerMockShipmentRoutes(
     "/internal/mock/shipments/:id/mark-delivered",
     TrackingEventType.DELIVERED
   );
+
+  app.post("/internal/mock/shipments/:id/raise-exception", async (request) => {
+    const params = parse(shipmentParamsSchema, request.params);
+    verifyDemoOpsKey(request, options.demoOpsKey);
+    const exception = options.exceptionService.raiseException({
+      entityType: "SHIPMENT",
+      entityId: params.id,
+      type: "UK_LAST_MILE_INFORMATION_PENDING",
+      title: "末端派送信息待确认",
+      description: "英国本地派送状态暂未更新，正在核实。",
+      impact: "本次转运暂时无法继续更新后续进度。",
+      requiredAction: "当前无需操作，正在处理。"
+    });
+
+    return { data: { id: exception.id, status: exception.status } };
+  });
+
+  app.post("/internal/mock/shipments/:id/resolve-exception", async (request) => {
+    const params = parse(shipmentParamsSchema, request.params);
+    verifyDemoOpsKey(request, options.demoOpsKey);
+    const exception = options.exceptionService.resolveOpenExceptionForEntity(
+      "SHIPMENT",
+      params.id
+    );
+
+    return { data: { id: exception.id, status: exception.status } };
+  });
 }
 
 function registerTrackingRoute(

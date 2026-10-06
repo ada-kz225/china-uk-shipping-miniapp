@@ -283,7 +283,7 @@ export class PackageService {
 
     if (exception?.isBlocking) {
       throw new AppError(
-        "INVALID_STATE_TRANSITION",
+        "WORKFLOW_BLOCKED_BY_EXCEPTION",
         409,
         "该包裹存在需要处理的问题，暂时不能继续操作。"
       );

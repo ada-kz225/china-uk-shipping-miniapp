@@ -180,7 +180,7 @@ export class QuoteService {
   private ensureNoBlockingException(shipmentId: string): void {
     if (this.exceptionRepository.findOpenByShipmentId(shipmentId)?.isBlocking) {
       throw new AppError(
-        "QUOTE_NOT_READY",
+        "WORKFLOW_BLOCKED_BY_EXCEPTION",
         409,
         "当前存在需要处理的问题，暂不能生成报价。"
       );

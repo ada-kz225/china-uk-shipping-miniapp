@@ -8,6 +8,10 @@ import type {
 import { PaymentStatus, ShipmentStatus } from "../domain/index.js";
 import type { ShipmentDetails } from "../services/shipment-service.js";
 import { getTrackingEventDescription } from "../services/tracking-service.js";
+import {
+  presentActiveException,
+  type ActiveExceptionDto
+} from "./exception-presenter.js";
 import { presentPackage, type PackageDto } from "./package-presenter.js";
 
 type ShipmentCopy = {
@@ -100,6 +104,7 @@ export type ShipmentDto = {
   quote?: QuoteDto | null;
   latestPayment?: PaymentDto | null;
   trackingEvents?: TrackingEventDto[];
+  activeException?: ActiveExceptionDto | null;
   unselectedReadyPackageCount?: number;
 };
 
@@ -178,6 +183,9 @@ export function presentShipmentDetail(entity: ShipmentDetails): ShipmentDto {
       ? presentLatestPayment(entity.latestPayment)
       : null,
     trackingEvents: entity.trackingEvents.map(presentTrackingEvent),
+    activeException: entity.activeException
+      ? presentActiveException(entity.activeException)
+      : null,
     unselectedReadyPackageCount:
       entity.status === ShipmentStatus.DRAFT
         ? Math.max(entity.readyPackageCount - entity.packages.length, 0)

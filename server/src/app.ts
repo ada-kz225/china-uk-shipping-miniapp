@@ -20,6 +20,7 @@ import { PackageService } from "./services/package-service.js";
 import { PaymentService } from "./services/payment-service.js";
 import { QuoteService } from "./services/quote-service.js";
 import { DispatchService } from "./services/dispatch-service.js";
+import { ExceptionService } from "./services/exception-service.js";
 import { ShipmentService } from "./services/shipment-service.js";
 import { TrackingService } from "./services/tracking-service.js";
 import { AppError } from "./utils/app-error.js";
@@ -118,6 +119,13 @@ export async function buildApp(
     trackingRepository,
     auditLogRepository
   );
+  const exceptionService = new ExceptionService(
+    database,
+    exceptionRepository,
+    packageRepository,
+    shipmentRepository,
+    auditLogRepository
+  );
 
   app.addHook("onClose", async () => {
     database.close();
@@ -160,6 +168,7 @@ export async function buildApp(
   if (options.config.environment !== "production") {
     await registerMockPackageRoutes(app, {
       packageService,
+      exceptionService,
       demoOpsKey: options.config.demoOpsKey
     });
     await registerMockShipmentRoutes(app, {
@@ -168,6 +177,7 @@ export async function buildApp(
       paymentService,
       dispatchService,
       trackingService,
+      exceptionService,
       demoOpsKey: options.config.demoOpsKey
     });
   }

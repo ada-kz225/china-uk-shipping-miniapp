@@ -222,7 +222,7 @@ export class PaymentService {
   private ensureNoBlockingException(shipmentId: string): void {
     if (this.exceptionRepository.findOpenByShipmentId(shipmentId)?.isBlocking) {
       throw new AppError(
-        "PAYMENT_FAILED",
+        "WORKFLOW_BLOCKED_BY_EXCEPTION",
         409,
         "当前转运单存在需要处理的问题，暂不能付款。"
       );

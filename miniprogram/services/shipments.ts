@@ -26,6 +26,7 @@ export type ShipmentDto = {
   quote?: QuoteDto | null;
   latestPayment?: PaymentDto | null;
   trackingEvents?: TrackingEventDto[];
+  activeException?: ActiveExceptionDto | null;
   unselectedReadyPackageCount?: number;
 };
 
@@ -55,6 +56,15 @@ export type TrackingEventDto = {
   title: string;
   description: string;
   occurredAt: string;
+};
+
+export type ActiveExceptionDto = {
+  title: string;
+  description: string;
+  impact: string;
+  requiredAction: string;
+  progress: string;
+  support: string;
 };
 
 type ShipmentResponse = {

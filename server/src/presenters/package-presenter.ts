@@ -1,5 +1,9 @@
 import type { DomainException, Package } from "../domain/index.js";
 import { PackageStatus } from "../domain/index.js";
+import {
+  presentActiveException,
+  type ActiveExceptionDto
+} from "./exception-presenter.js";
 
 type PackageCopy = {
   label: string;
@@ -55,12 +59,7 @@ export type PackageDto = {
   selectionReason: string | null;
   createdAt: string;
   updatedAt: string;
-  exception: {
-    title: string;
-    description: string;
-    impact: string;
-    requiredAction: string;
-  } | null;
+  activeException: ActiveExceptionDto | null;
 };
 
 export function presentPackage(
@@ -84,14 +83,7 @@ export function presentPackage(
     selectionReason: getSelectionReason(entity),
     createdAt: entity.createdAt,
     updatedAt: entity.updatedAt,
-    exception: exception
-      ? {
-          title: exception.title,
-          description: exception.description,
-          impact: exception.impact,
-          requiredAction: exception.requiredAction
-        }
-      : null
+    activeException: exception ? presentActiveException(exception) : null
   };
 }
 
