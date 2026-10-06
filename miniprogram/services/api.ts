@@ -11,11 +11,13 @@ export type ApiErrorPayload = {
 
 export class ApiError extends Error {
   public readonly statusCode?: number;
+  public readonly code?: string;
 
-  constructor(message: string, statusCode?: number) {
+  constructor(message: string, statusCode?: number, code?: string) {
     super(message);
     this.name = "ApiError";
     this.statusCode = statusCode;
+    this.code = code;
   }
 }
 
@@ -24,7 +26,10 @@ function request<T>(method: HttpMethod, path: string, data?: unknown): Promise<T
     wx.request({
       url: environmentConfig.apiBaseUrl + path,
       method,
-      data,
+      data: data as WechatMiniprogram.IAnyObject | undefined,
+      header: {
+        "X-Demo-User-Id": environmentConfig.demoUserId
+      },
       success(response) {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           resolve(response.data as T);
@@ -35,7 +40,8 @@ function request<T>(method: HttpMethod, path: string, data?: unknown): Promise<T
         reject(
           new ApiError(
             payload.error?.message ?? "服务暂时不可用，请稍后重试。",
-            response.statusCode
+            response.statusCode,
+            payload.error?.code
           )
         );
       },

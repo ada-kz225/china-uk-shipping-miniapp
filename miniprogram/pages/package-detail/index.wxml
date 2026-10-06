@@ -1,0 +1,65 @@
+<view class="detail-page">
+  <view wx:if="{{isLoading}}" class="feedback-state">
+    <text>正在加载。</text>
+  </view>
+
+  <view wx:elif="{{errorMessage}}" class="feedback-state">
+    <text class="feedback-message">{{errorMessage}}</text>
+    <button class="secondary-button" bindtap="onRetryTap">重新加载</button>
+  </view>
+
+  <view wx:elif="{{package}}" class="detail-content">
+    <view class="status-section">
+      <text class="status-label">{{package.statusLabel}}</text>
+      <text class="status-description">{{package.statusDescription}}</text>
+      <view class="next-action">
+        <text class="section-kicker">下一步</text>
+        <text wx:for="{{package.availableActions}}" wx:key="*this" class="next-action-text">{{item}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{package.exception}}" class="exception-section">
+      <text class="section-title">需要处理的问题</text>
+      <view class="exception-row">
+        <text class="section-kicker">发生什么</text>
+        <text>{{package.exception.title}}：{{package.exception.description}}</text>
+      </view>
+      <view class="exception-row">
+        <text class="section-kicker">影响什么</text>
+        <text>{{package.exception.impact}}</text>
+      </view>
+      <view class="exception-row">
+        <text class="section-kicker">你需要做什么</text>
+        <text>{{package.exception.requiredAction}}</text>
+      </view>
+    </view>
+
+    <view class="information-section">
+      <text class="section-title">包裹信息</text>
+      <view class="information-row">
+        <text class="information-label">国内快递单号</text>
+        <text class="information-value">{{package.domesticTrackingNumber}}</text>
+      </view>
+      <view class="information-row">
+        <text class="information-label">商品描述</text>
+        <text class="information-value">{{package.description}}</text>
+      </view>
+      <view class="information-row" wx:if="{{package.arrivedAtDisplay}}">
+        <text class="information-label">到仓时间</text>
+        <text class="information-value">{{package.arrivedAtDisplay}}</text>
+      </view>
+      <view class="information-row" wx:if="{{package.weightDisplay}}">
+        <text class="information-label">重量</text>
+        <text class="information-value">{{package.weightDisplay}}</text>
+      </view>
+      <view class="information-row" wx:if="{{package.shipmentReference}}">
+        <text class="information-label">关联转运单</text>
+        <text class="information-value">{{package.shipmentReference}}</text>
+      </view>
+      <view class="information-row">
+        <text class="information-label">预报时间</text>
+        <text class="information-value">{{package.createdAtDisplay}}</text>
+      </view>
+    </view>
+  </view>
+</view>

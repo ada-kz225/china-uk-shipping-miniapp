@@ -9,5 +9,6 @@ const apiBaseUrls: Record<AppEnvironment, string> = {
 
 export const environmentConfig = {
   environment: currentEnvironment,
-  apiBaseUrl: apiBaseUrls[currentEnvironment]
+  apiBaseUrl: apiBaseUrls[currentEnvironment],
+  demoUserId: "usr_demo_primary"
 };

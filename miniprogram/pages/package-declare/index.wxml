@@ -1,0 +1,40 @@
+<view class="declare-page">
+  <view class="intro">
+    <text class="page-title">预报包裹</text>
+    <text class="page-description">填写最少信息，便于仓库后续确认包裹归属。</text>
+  </view>
+
+  <view class="form-card">
+    <view class="field-group">
+      <text class="field-label">国内快递单号</text>
+      <input
+        class="field-input"
+        value="{{domesticTrackingNumber}}"
+        placeholder="请输入国内快递单号"
+        maxlength="80"
+        bindinput="onTrackingNumberInput"
+      />
+    </view>
+
+    <view class="field-group">
+      <text class="field-label">商品描述</text>
+      <textarea
+        class="field-textarea"
+        value="{{description}}"
+        placeholder="例如：生活用品、衣物或零食"
+        maxlength="200"
+        auto-height="true"
+        bindinput="onDescriptionInput"
+      />
+    </view>
+  </view>
+
+  <button
+    class="submit-button"
+    loading="{{isSubmitting}}"
+    disabled="{{isSubmitting}}"
+    bindtap="onSubmit"
+  >
+    {{isSubmitting ? '正在提交' : '提交预报'}}
+  </button>
+</view>

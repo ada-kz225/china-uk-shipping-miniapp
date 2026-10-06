@@ -1,0 +1,66 @@
+@import "../../app.wxss";
+
+.declare-page {
+  min-height: 100vh;
+  padding: 40rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.page-title {
+  display: block;
+  color: #1f1f1f;
+  font-size: 44rpx;
+  font-weight: 600;
+}
+
+.page-description {
+  display: block;
+  margin-top: 16rpx;
+  color: #666666;
+  font-size: 28rpx;
+  line-height: 1.55;
+}
+
+.form-card {
+  margin-top: 36rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+}
+
+.field-group {
+  padding: 28rpx 0;
+  border-bottom: 1rpx solid #e8e8e8;
+}
+
+.field-group:last-child {
+  border-bottom: 0;
+}
+
+.field-label {
+  display: block;
+  color: #333333;
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+.field-input,
+.field-textarea {
+  width: 100%;
+  margin-top: 18rpx;
+  color: #1f1f1f;
+  font-size: 30rpx;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.field-textarea {
+  min-height: 112rpx;
+}
+
+.submit-button {
+  margin-top: 40rpx;
+  background: #1f1f1f;
+  color: #ffffff;
+  font-size: 32rpx;
+}

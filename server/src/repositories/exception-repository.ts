@@ -83,6 +83,18 @@ export class ExceptionRepository {
     return this.listBy("package_id", packageId);
   }
 
+  findOpenByPackageId(packageId: string): DomainException | undefined {
+    const row = this.database
+      .prepare(
+        "SELECT " +
+          exceptionFields +
+          " FROM exceptions WHERE package_id = ? AND status = 'OPEN' ORDER BY created_at DESC LIMIT 1"
+      )
+      .get(packageId) as ExceptionRow | undefined;
+
+    return row ? { ...row, isBlocking: Boolean(row.isBlocking) } : undefined;
+  }
+
   listByShipmentId(shipmentId: string): DomainException[] {
     return this.listBy("shipment_id", shipmentId);
   }

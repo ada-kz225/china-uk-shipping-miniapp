@@ -2,7 +2,9 @@
   "pages": [
     "pages/home/index",
     "pages/packages/index",
-    "pages/shipments/index"
+    "pages/shipments/index",
+    "pages/package-detail/index",
+    "pages/package-declare/index"
   ],
   "window": {
     "navigationBarTitleText": "中英转运",

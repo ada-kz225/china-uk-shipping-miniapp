@@ -1,1 +1,146 @@
 @import "../../app.wxss";
+
+.package-page {
+  min-height: 100vh;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.page-title {
+  display: block;
+  font-size: 44rpx;
+  font-weight: 600;
+}
+
+.page-description {
+  display: block;
+  margin-top: 12rpx;
+  color: #666666;
+  font-size: 26rpx;
+}
+
+.declare-button,
+.secondary-button {
+  margin: 0;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  line-height: 64rpx;
+}
+
+.declare-button {
+  background: #1f1f1f;
+  color: #ffffff;
+}
+
+.filter-bar {
+  margin: 32rpx -32rpx 20rpx;
+  padding: 0 32rpx;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.filter-items {
+  display: inline-flex;
+  gap: 16rpx;
+}
+
+.filter-item {
+  padding: 12rpx 20rpx;
+  border: 1rpx solid #d7d7d7;
+  border-radius: 999rpx;
+  color: #555555;
+  font-size: 27rpx;
+}
+
+.filter-item-active {
+  border-color: #1f1f1f;
+  background: #1f1f1f;
+  color: #ffffff;
+}
+
+.package-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.package-card {
+  padding: 24rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+  align-items: flex-start;
+}
+
+.tracking-number {
+  color: #262626;
+  font-size: 30rpx;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.status-label {
+  flex: none;
+  color: #3a3a3a;
+  font-size: 25rpx;
+}
+
+.package-description {
+  display: block;
+  margin-top: 18rpx;
+  color: #333333;
+  font-size: 29rpx;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx 24rpx;
+  margin-top: 16rpx;
+  color: #777777;
+  font-size: 25rpx;
+}
+
+.relation-note,
+.exception-note {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 25rpx;
+}
+
+.relation-note {
+  color: #555555;
+}
+
+.exception-note {
+  color: #9f3629;
+}
+
+.feedback-state {
+  margin-top: 80rpx;
+  text-align: center;
+  color: #666666;
+  font-size: 28rpx;
+}
+
+.feedback-message {
+  display: block;
+}
+
+.secondary-button {
+  margin: 24rpx auto 0;
+  background: #ffffff;
+  color: #333333;
+}

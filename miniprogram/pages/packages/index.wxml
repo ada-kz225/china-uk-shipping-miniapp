@@ -1,4 +1,63 @@
-<view class="phase-zero-page">
-  <text class="phase-zero-title">我的包裹</text>
-  <text class="phase-zero-description">功能正在开发中。</text>
+<view class="package-page">
+  <view class="page-heading">
+    <view>
+      <text class="page-title">我的包裹</text>
+      <text class="page-description">查看包裹到仓、确认和转运状态</text>
+    </view>
+    <button class="declare-button" bindtap="onDeclareTap">预报包裹</button>
+  </view>
+
+  <scroll-view class="filter-bar" scroll-x="true" enable-flex="true">
+    <view class="filter-items">
+      <view
+        wx:for="{{filters}}"
+        wx:key="key"
+        class="filter-item {{selectedFilter === item.key ? 'filter-item-active' : ''}}"
+        data-filter="{{item.key}}"
+        bindtap="onFilterTap"
+      >
+        {{item.label}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{isLoading}}" class="feedback-state">
+    <text>正在加载。</text>
+  </view>
+
+  <view wx:elif="{{errorMessage}}" class="feedback-state">
+    <text class="feedback-message">{{errorMessage}}</text>
+    <button class="secondary-button" bindtap="onRetryTap">重新加载</button>
+  </view>
+
+  <view wx:elif="{{packages.length === 0}}" class="feedback-state">
+    <text wx:if="{{selectedFilter === 'all'}}">暂无包裹。下单后可预报国内运单号。</text>
+    <text wx:else>该状态下暂无包裹。</text>
+  </view>
+
+  <view wx:else class="package-list">
+    <view
+      wx:for="{{packages}}"
+      wx:key="id"
+      class="package-card"
+      data-id="{{item.id}}"
+      bindtap="onPackageTap"
+    >
+      <view class="card-header">
+        <text class="tracking-number">{{item.domesticTrackingNumber}}</text>
+        <text class="status-label">{{item.statusLabel}}</text>
+      </view>
+      <text class="package-description">{{item.description}}</text>
+      <view class="card-meta">
+        <text wx:if="{{item.arrivedAtDisplay}}">到仓：{{item.arrivedAtDisplay}}</text>
+        <text wx:if="{{item.weightDisplay}}">重量：{{item.weightDisplay}}</text>
+      </view>
+      <view wx:if="{{item.shipmentReference}}" class="relation-note">
+        已关联转运单：{{item.shipmentReference}}
+      </view>
+      <view wx:if="{{item.exception}}" class="exception-note">
+        {{item.exception.title}}
+      </view>
+    </view>
+  </view>
 </view>

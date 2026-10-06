@@ -5,7 +5,8 @@ const rawEnvironmentSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   HOST: z.string().min(1).default("127.0.0.1"),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
-  SQLITE_DB_PATH: z.string().min(1).default("./data/dev.sqlite")
+  SQLITE_DB_PATH: z.string().min(1).default("./data/dev.sqlite"),
+  DEMO_OPS_KEY: z.string().min(1).default("local-demo-ops-key")
 });
 
 export type AppConfig = {
@@ -13,6 +14,7 @@ export type AppConfig = {
   host: string;
   port: number;
   sqliteDbPath: string;
+  demoOpsKey: string;
 };
 
 export function loadConfig(
@@ -22,7 +24,7 @@ export function loadConfig(
 
   if (!parsed.success) {
     throw new Error(
-      "服务配置无效，请检查 HOST、PORT、SQLITE_DB_PATH 和 NODE_ENV。"
+      "服务配置无效，请检查 HOST、PORT、SQLITE_DB_PATH、DEMO_OPS_KEY 和 NODE_ENV。"
     );
   }
 
@@ -30,6 +32,7 @@ export function loadConfig(
     environment: parsed.data.NODE_ENV,
     host: parsed.data.HOST,
     port: parsed.data.PORT,
-    sqliteDbPath: parsed.data.SQLITE_DB_PATH
+    sqliteDbPath: parsed.data.SQLITE_DB_PATH,
+    demoOpsKey: parsed.data.DEMO_OPS_KEY
   };
 }

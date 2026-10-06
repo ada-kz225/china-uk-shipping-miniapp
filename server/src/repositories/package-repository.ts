@@ -21,18 +21,27 @@ export type UpdatePackageInput = Partial<
 >;
 
 const packageFields = [
-  "id",
-  "user_id AS userId",
-  "warehouse_id AS warehouseId",
-  "domestic_tracking_number AS domesticTrackingNumber",
-  "description",
-  "status",
-  "arrived_at AS arrivedAt",
-  "weight_g AS weightG",
-  "version",
-  "created_at AS createdAt",
-  "updated_at AS updatedAt"
+  "packages.id AS id",
+  "packages.user_id AS userId",
+  "packages.warehouse_id AS warehouseId",
+  "packages.domestic_tracking_number AS domesticTrackingNumber",
+  "packages.description AS description",
+  "packages.status AS status",
+  "packages.arrived_at AS arrivedAt",
+  "packages.weight_g AS weightG",
+  "packages.version AS version",
+  "packages.created_at AS createdAt",
+  "packages.updated_at AS updatedAt",
+  "shipments.reference AS shipmentReference"
 ].join(", ");
+
+const packageFromClause = [
+  "FROM packages",
+  "LEFT JOIN shipment_packages",
+  "ON shipment_packages.package_id = packages.id",
+  "AND shipment_packages.released_at IS NULL",
+  "LEFT JOIN shipments ON shipments.id = shipment_packages.shipment_id"
+].join(" ");
 
 export class PackageRepository {
   constructor(private readonly database: SqliteDatabase) {}
@@ -68,18 +77,39 @@ export class PackageRepository {
 
   findById(id: string): Package | undefined {
     return this.database
-      .prepare("SELECT " + packageFields + " FROM packages WHERE id = ?")
+      .prepare("SELECT " + packageFields + " " + packageFromClause + " WHERE packages.id = ?")
       .get(id) as Package | undefined;
   }
 
-  listByUserId(userId: string): Package[] {
+  findByTrackingNumber(domesticTrackingNumber: string): Package | undefined {
     return this.database
       .prepare(
         "SELECT " +
           packageFields +
-          " FROM packages WHERE user_id = ? ORDER BY updated_at DESC"
+          " " +
+          packageFromClause +
+          " WHERE packages.domestic_tracking_number = ?"
       )
-      .all(userId) as Package[];
+      .get(domesticTrackingNumber) as Package | undefined;
+  }
+
+  listByUserId(userId: string, statuses?: PackageStatus[]): Package[] {
+    const statusFilter =
+      statuses && statuses.length > 0
+        ? " AND packages.status IN (" + statuses.map(() => "?").join(", ") + ")"
+        : "";
+
+    return this.database
+      .prepare(
+        "SELECT " +
+          packageFields +
+          " " +
+          packageFromClause +
+          " WHERE packages.user_id = ?" +
+          statusFilter +
+          " ORDER BY packages.updated_at DESC"
+      )
+      .all(userId, ...(statuses ?? [])) as Package[];
   }
 
   update(id: string, input: UpdatePackageInput): Package | undefined {

@@ -18,6 +18,7 @@ export type Package = {
   version: number;
   createdAt: string;
   updatedAt: string;
+  shipmentReference?: string | null;
 };
 
 export type Shipment = {

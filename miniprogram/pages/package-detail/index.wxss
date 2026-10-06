@@ -1,0 +1,111 @@
+@import "../../app.wxss";
+
+.detail-page {
+  min-height: 100vh;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.status-section,
+.information-section,
+.exception-section {
+  padding: 28rpx 24rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+}
+
+.status-label {
+  display: block;
+  color: #1f1f1f;
+  font-size: 38rpx;
+  font-weight: 600;
+}
+
+.status-description {
+  display: block;
+  margin-top: 16rpx;
+  color: #555555;
+  font-size: 29rpx;
+  line-height: 1.65;
+}
+
+.next-action {
+  margin-top: 24rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx solid #e8e8e8;
+}
+
+.section-kicker,
+.information-label {
+  display: block;
+  color: #777777;
+  font-size: 25rpx;
+}
+
+.next-action-text {
+  display: block;
+  margin-top: 8rpx;
+  color: #333333;
+  font-size: 28rpx;
+  line-height: 1.55;
+}
+
+.section-title {
+  display: block;
+  color: #1f1f1f;
+  font-size: 31rpx;
+  font-weight: 600;
+}
+
+.exception-section {
+  border: 1rpx solid #e7c8c3;
+}
+
+.exception-row {
+  margin-top: 20rpx;
+  color: #4d3733;
+  font-size: 28rpx;
+  line-height: 1.55;
+}
+
+.information-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 32rpx;
+  margin-top: 24rpx;
+}
+
+.information-value {
+  flex: 1;
+  color: #333333;
+  font-size: 28rpx;
+  line-height: 1.45;
+  text-align: right;
+  word-break: break-all;
+}
+
+.feedback-state {
+  margin-top: 120rpx;
+  text-align: center;
+  color: #666666;
+  font-size: 28rpx;
+}
+
+.feedback-message {
+  display: block;
+}
+
+.secondary-button {
+  margin: 24rpx auto 0;
+  padding: 0 24rpx;
+  background: #ffffff;
+  color: #333333;
+  font-size: 28rpx;
+  line-height: 64rpx;
+}

@@ -2,9 +2,9 @@
 
 一个从 0 到 1 设计并实现的个人 Portfolio MVP，面向需要从中国寄送多个包裹到英国的个人用户。项目文档完整保留了产品研究、用户验证、产品定义、交互设计、PRD、可点击原型与技术设计过程。
 
-> 当前阶段：**Development — Phase 1：Domain Model + SQLite Schema + Seed Data**
+> 当前阶段：**Development — Phase 2：Package Management**
 >
-> 当前已完成持久化 Schema、基础 Repository 与演示数据。Package、Shipment、报价、付款、物流、异常与 Mock Ops 的正式业务 API 和小程序页面功能尚未开始实现。
+> 当前已完成 Package 预报、列表、详情、状态说明与受保护的 Mock Ops 状态推进。Shipment、报价、付款、物流、异常工作流与首页数据仍未开始实现。
 
 ## 当前能力
 
@@ -14,8 +14,12 @@
 - `GET /health` 健康检查；
 - SQLite 可重复迁移、核心 Schema 与基础 Repository；
 - 可重复执行的 Portfolio Demo Seed；
-- Vitest 健康检查与数据库约束测试；
-- 小程序统一 API Client 骨架，当前只请求 `GET /health`。
+- Package Service、状态机、归属校验与关键审计记录；
+- Package 用户 API：预报、列表、状态筛选与详情；
+- 仅开发 / 演示环境可用的受保护 Mock Ops Package API；
+- 小程序 Package 列表、详情、预报页，均使用真实后端 API；
+- Vitest 健康检查、数据库约束、Package Service 与 API 测试；
+- 小程序 API Client 与微信官方 TypeScript API 类型声明。
 
 ## 项目结构
 
@@ -23,18 +27,18 @@
 china-uk-shipping-miniapp/
 ├── miniprogram/                 # 正式微信小程序代码
 │   ├── config/                  # 小程序开发 / 测试环境配置
-│   ├── services/                # 统一 API Client
-│   └── pages/                   # 首页、包裹、转运占位页
+│   ├── services/                # 统一 API Client 与 Package API
+│   └── pages/                   # 首页、Package、转运与 Package 子页面
 ├── server/                      # Fastify API 服务
 │   ├── src/
 │   │   ├── config/              # Zod 环境配置
 │   │   ├── db/                  # SQLite 连接、迁移、初始化与 Seed
-│   │   ├── routes/              # 当前仅 health route
-│   │   ├── services/            # 后续业务服务
-│   │   ├── domain/              # 状态码与领域类型
-│   │   ├── repositories/        # 基础数据访问层
-│   │   ├── schemas/             # 后续请求校验
-│   │   └── utils/               # 后续通用工具
+│   │   ├── routes/              # Health、Package 与开发期 Mock Ops 路由
+│   │   ├── services/            # 领域服务与状态机入口
+│   │   ├── domain/              # 状态码、领域类型与状态机
+│   │   ├── presenters/          # 中文用户 DTO 映射
+│   │   ├── repositories/        # 数据访问层
+│   │   └── utils/               # 通用错误与标识工具
 │   └── tests/                   # Vitest 测试
 ├── docs/                        # 产品、设计、PRD 与技术设计文档
 ├── prototype/                   # 已冻结的独立可点击原型
@@ -83,7 +87,7 @@ china-uk-shipping-miniapp/
 npm run test:server
 ```
 
-健康检查测试使用 SQLite 内存数据库（`:memory:`），不会写入或污染 `server/data/dev.sqlite`。
+自动化测试使用 SQLite 内存数据库或独立临时数据库，不会写入或污染 `server/data/dev.sqlite`。
 
 可选的 TypeScript 检查：
 
@@ -114,7 +118,7 @@ Phase 1 的 Seed 使用虚构用户、地址、运单、金额与时间。它建
 4. 使用项目内的 `project.config.json`；当前使用体验版 AppID 配置；
 5. 可切换 **首页、包裹、转运** 三个 Tab。
 
-小程序启动时会向开发环境 API 发起一次 `GET /health` 请求。当前默认地址为 `http://127.0.0.1:3000`，定义在 `miniprogram/config/env.ts`。
+Package 页会请求开发环境 API。当前默认地址为 `http://127.0.0.1:3000`，定义在 `miniprogram/config/env.ts`；本地开发使用固定的匿名 Demo 用户身份，仅用于作品集联调。
 
 ### 本地网络说明
 
@@ -124,11 +128,10 @@ Phase 1 的 Seed 使用虚构用户、地址、运单、金额与时间。它建
 
 以下能力已在 PRD 与技术设计中定义，但明确留在后续 Phase：
 
-- Package 预报、到仓、匹配和列表 API；
 - Shipment 草稿、合箱、地址、锁定与提交 API；
 - Quote、模拟付款和出库闸门业务逻辑；
 - 国际运输、清关、英国派送与签收业务逻辑；
-- Exception 与 Mock Ops 的业务服务及接口；
+- Exception 工作流，以及 Shipment / Quote / Payment / Tracking 的 Mock Ops；
 - 真实微信登录、真实微信支付、真实仓库 / 物流 API。
 
 ## 文档导航
