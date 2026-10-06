@@ -23,12 +23,16 @@ export class ApiError extends Error {
 
 function request<T>(method: HttpMethod, path: string, data?: unknown): Promise<T> {
   return new Promise((resolve, reject) => {
+    const hasBody = data !== undefined;
+
     wx.request({
       url: environmentConfig.apiBaseUrl + path,
       method,
-      data: data as WechatMiniprogram.IAnyObject | undefined,
+      data: hasBody ? (data as WechatMiniprogram.IAnyObject) : undefined,
       header: {
-        "X-Demo-User-Id": environmentConfig.demoUserId
+        "X-Demo-User-Id": environmentConfig.demoUserId,
+        // Avoid the platform default application/json header when no body exists.
+        "content-type": hasBody ? "application/json" : "text/plain"
       },
       success(response) {
         if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -37,6 +41,7 @@ function request<T>(method: HttpMethod, path: string, data?: unknown): Promise<T
         }
 
         const payload = response.data as ApiErrorPayload;
+        logApiFailure(method, path, response.statusCode, payload.error?.code);
         reject(
           new ApiError(
             payload.error?.message ?? "服务暂时不可用，请稍后重试。",
@@ -45,10 +50,31 @@ function request<T>(method: HttpMethod, path: string, data?: unknown): Promise<T
           )
         );
       },
-      fail() {
+      fail(error) {
+        logApiFailure(method, path, undefined, undefined, error);
         reject(new ApiError("暂时无法连接服务，请稍后重试。"));
       }
     });
+  });
+}
+
+function logApiFailure(
+  method: HttpMethod,
+  path: string,
+  statusCode?: number,
+  errorCode?: string,
+  error?: unknown
+): void {
+  if (environmentConfig.environment !== "development") {
+    return;
+  }
+
+  console.error("[API 请求失败]", {
+    method,
+    path,
+    statusCode,
+    errorCode,
+    error
   });
 }
 

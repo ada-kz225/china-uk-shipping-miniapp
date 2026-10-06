@@ -62,9 +62,8 @@ export async function registerPackageRoutes(
     );
 
     return {
-      data: packages.map((item) =>
-        presentPackage(item.package, item.exception)
-      )
+      data: packages.map((item) => presentPackage(item.package, item.exception)),
+      statusCounts: options.packageService.getStatusCounts(userId)
     };
   });
 

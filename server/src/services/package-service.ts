@@ -28,6 +28,8 @@ export type PackageWithException = {
   exception: DomainException | undefined;
 };
 
+export type PackageStatusCounts = Record<PackageListFilter, number>;
+
 const statusesByFilter: Record<
   Exclude<PackageListFilter, "all">,
   PackageStatus[]
@@ -127,6 +129,23 @@ export class PackageService {
       package: entity,
       exception: this.exceptionRepository.findOpenByPackageId(entity.id)
     }));
+  }
+
+  /**
+   * Counts deliberately use the same filter definitions as listPackages.
+   * The client needs the counts for every filter even while one filter is active.
+   */
+  getStatusCounts(userId: string): PackageStatusCounts {
+    const packages = this.packageRepository.listByUserId(userId);
+
+    return {
+      all: packages.length,
+      inbound: countByFilter(packages, "inbound"),
+      pending_match: countByFilter(packages, "pending_match"),
+      ready: countByFilter(packages, "ready"),
+      in_shipment: countByFilter(packages, "in_shipment"),
+      needs_action: countByFilter(packages, "needs_action")
+    };
   }
 
   receivePackage(packageId: string, actorId = "mock-ops"): Package {
@@ -286,6 +305,13 @@ export class PackageService {
 
     return warehouse.id;
   }
+}
+
+function countByFilter(
+  packages: Package[],
+  filter: Exclude<PackageListFilter, "all">
+): number {
+  return packages.filter((item) => statusesByFilter[filter].includes(item.status)).length;
 }
 
 function normalizeTrackingNumber(value: string): string {

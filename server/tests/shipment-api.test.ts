@@ -116,6 +116,7 @@ describe("Shipment API", () => {
       url: "/shipments/" + draftId + "/packages/" + second,
       headers: { "x-demo-user-id": users.primaryUserId }
     });
+    expect(removeResponse?.statusCode).toBe(200);
     expect(removeResponse?.json().data.packageCount).toBe(1);
 
     const detailResponse = await app?.inject({
@@ -147,7 +148,7 @@ describe("Shipment API", () => {
     expect(listResponse?.json().data).toHaveLength(1);
   });
 
-  it("rejects forbidden access to another user's shipment", async () => {
+  it("does not allow another user to remove a package from a draft", async () => {
     const users = await createApi();
     const packageId = createReadyPackage(
       users.primaryUserId,
@@ -163,8 +164,8 @@ describe("Shipment API", () => {
     const shipmentId = created?.json().data.id as string;
 
     const response = await app?.inject({
-      method: "GET",
-      url: "/shipments/" + shipmentId,
+      method: "DELETE",
+      url: "/shipments/" + shipmentId + "/packages/" + packageId,
       headers: { "x-demo-user-id": users.secondaryUserId }
     });
 
@@ -206,6 +207,101 @@ describe("Shipment API", () => {
       error: {
         code: "PACKAGE_NOT_ELIGIBLE",
         message: "正在确认归属，暂不可选。"
+      }
+    });
+  });
+
+  it("handles wx.request-style empty JSON bodies when removing and cancelling a draft", async () => {
+    const users = await createApi();
+    const packageIds = Array.from({ length: 8 }, (_, index) =>
+      createReadyPackage(
+        users.primaryUserId,
+        users.warehouseId,
+        "wechat-" + (index + 1)
+      )
+    );
+    const headers = {
+      "x-demo-user-id": users.primaryUserId,
+      "content-type": "application/json"
+    };
+
+    const createResponse = await app?.inject({
+      method: "POST",
+      url: "/shipments",
+      headers,
+      payload: { packageIds }
+    });
+    expect(createResponse?.statusCode).toBe(200);
+    const draftId = createResponse?.json().data.id as string;
+
+    const removeResponse = await app?.inject({
+      method: "DELETE",
+      url: "/shipments/" + draftId + "/packages/" + packageIds[0],
+      headers
+    });
+    expect(removeResponse?.statusCode).toBe(200);
+    expect(removeResponse?.json().data.packageCount).toBe(7);
+    expect(
+      new PackageRepository(database as SqliteDatabase).findById(packageIds[0])
+        ?.status
+    ).toBe(PackageStatus.READY_FOR_SHIPMENT);
+
+    const addResponse = await app?.inject({
+      method: "POST",
+      url: "/shipments/" + draftId + "/packages",
+      headers,
+      payload: { packageIds: [packageIds[0]] }
+    });
+    expect(addResponse?.statusCode).toBe(200);
+    expect(addResponse?.json().data.packageCount).toBe(8);
+
+    const cancelResponse = await app?.inject({
+      method: "POST",
+      url: "/shipments/" + draftId + "/cancel",
+      headers
+    });
+    expect(cancelResponse?.statusCode).toBe(200);
+    expect(
+      (database as SqliteDatabase)
+        .prepare(
+          "SELECT COUNT(*) AS count FROM shipment_draft_packages WHERE shipment_id = ?"
+        )
+        .get(draftId)
+    ).toEqual({ count: 0 });
+
+    for (const packageId of packageIds) {
+      expect(
+        new PackageRepository(database as SqliteDatabase).findById(packageId)
+          ?.status
+      ).toBe(PackageStatus.READY_FOR_SHIPMENT);
+    }
+
+    const reselectionResponse = await app?.inject({
+      method: "POST",
+      url: "/shipments",
+      headers,
+      payload: { packageIds: [packageIds[0]] }
+    });
+    expect(reselectionResponse?.statusCode).toBe(200);
+  });
+
+  it("returns a structured 400 instead of a 500 for malformed JSON", async () => {
+    await createApi();
+
+    const response = await app?.inject({
+      method: "POST",
+      url: "/shipments",
+      headers: {
+        "content-type": "application/json"
+      },
+      payload: "{"
+    });
+
+    expect(response?.statusCode).toBe(400);
+    expect(response?.json()).toMatchObject({
+      error: {
+        code: "INVALID_INPUT",
+        message: "请求正文不是有效 JSON。"
       }
     });
   });

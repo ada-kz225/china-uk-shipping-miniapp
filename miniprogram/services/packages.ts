@@ -31,18 +31,29 @@ export type PackageDto = {
   } | null;
 };
 
+export type PackageStatusCounts = Record<PackageFilter, number>;
+
+export type PackageListResult = {
+  packages: PackageDto[];
+  statusCounts: PackageStatusCounts;
+};
+
 type PackageResponse = {
   data: PackageDto;
 };
 
 type PackageListResponse = {
   data: PackageDto[];
+  statusCounts: PackageStatusCounts;
 };
 
-export function listPackages(filter: PackageFilter): Promise<PackageDto[]> {
+export function listPackages(filter: PackageFilter): Promise<PackageListResult> {
   return apiClient
     .get<PackageListResponse>("/packages?filter=" + filter)
-    .then((response) => response.data);
+    .then((response) => ({
+      packages: response.data,
+      statusCounts: response.statusCounts
+    }));
 }
 
 export function getPackage(id: string): Promise<PackageDto> {

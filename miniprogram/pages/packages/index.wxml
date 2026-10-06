@@ -40,13 +40,13 @@
     <view
       wx:for="{{packages}}"
       wx:key="id"
-      class="package-card"
+      class="package-card {{isSelectionMode && !item.isEligibleForShipment ? 'package-card-disabled' : ''}}"
       data-id="{{item.id}}"
       bindtap="onCardTap"
     >
       <view class="card-header">
         <view class="card-title">
-          <view wx:if="{{isSelectionMode}}" class="selection-mark {{item.isSelected ? 'selection-mark-active' : ''}}">
+          <view wx:if="{{isSelectionMode}}" class="selection-mark {{item.isSelected ? 'selection-mark-active' : ''}} {{!item.isEligibleForShipment ? 'selection-mark-disabled' : ''}}">
             {{item.isSelected ? '✓' : ''}}
           </view>
           <text class="tracking-number">{{item.domesticTrackingNumber}}</text>
@@ -65,7 +65,7 @@
         {{item.exception.title}}
       </view>
       <view wx:if="{{isSelectionMode && !item.isEligibleForShipment}}" class="unavailable-note">
-        {{item.selectionReason}}
+        不可选：{{item.selectionReason}}
       </view>
     </view>
   </view>

@@ -123,6 +123,88 @@ describe("ShipmentService", () => {
       first.id
     );
     expect(removed.packages.map((item) => item.id)).toEqual([second.id]);
+    expect(fixture.packageRepository.findById(first.id)?.status).toBe(
+      "READY_FOR_SHIPMENT"
+    );
+
+    const replacementDraft = fixture.service.createDraft(fixture.primary.userId, [
+      first.id
+    ]);
+    expect(replacementDraft.packages.map((item) => item.id)).toEqual([first.id]);
+  });
+
+  it("does not remove another package when a draft package is removed", () => {
+    const fixture = createFixture();
+    const first = createPackage(
+      fixture.packageRepository,
+      fixture.primary.userId,
+      fixture.primary.warehouseId,
+      "remove-first"
+    );
+    const second = createPackage(
+      fixture.packageRepository,
+      fixture.primary.userId,
+      fixture.primary.warehouseId,
+      "remove-second"
+    );
+    const draft = fixture.service.createDraft(fixture.primary.userId, [
+      first.id,
+      second.id
+    ]);
+
+    const result = fixture.service.removePackage(
+      fixture.primary.userId,
+      draft.id,
+      first.id
+    );
+
+    expect(result.packages.map((item) => item.id)).toEqual([second.id]);
+    expect(fixture.service.getShipment(fixture.primary.userId, draft.id).packages).toEqual([
+      expect.objectContaining({ id: second.id })
+    ]);
+  });
+
+  it("does not allow another user to remove a draft package", () => {
+    const fixture = createFixture();
+    const candidate = createPackage(
+      fixture.packageRepository,
+      fixture.primary.userId,
+      fixture.primary.warehouseId,
+      "remove-forbidden"
+    );
+    const draft = fixture.service.createDraft(fixture.primary.userId, [candidate.id]);
+
+    expectAppError(
+      () =>
+        fixture.service.removePackage(
+          fixture.secondary.userId,
+          draft.id,
+          candidate.id
+        ),
+      "FORBIDDEN"
+    );
+  });
+
+  it("does not allow a package to be removed after submission", () => {
+    const fixture = createFixture();
+    const candidate = createPackage(
+      fixture.packageRepository,
+      fixture.primary.userId,
+      fixture.primary.warehouseId,
+      "remove-submitted"
+    );
+    const draft = fixture.service.createDraft(fixture.primary.userId, [candidate.id]);
+    fixture.service.submitShipment(fixture.primary.userId, draft.id, address);
+
+    expectAppError(
+      () =>
+        fixture.service.removePackage(
+          fixture.primary.userId,
+          draft.id,
+          candidate.id
+        ),
+      "INVALID_SHIPMENT_STATE"
+    );
   });
 
   it("rejects packages that are not ready or owned by another user", () => {

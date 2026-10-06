@@ -57,9 +57,6 @@
     </view>
 
     <button class="cancel-button" bindtap="onCancelDraftTap">取消本次转运</button>
-  </view>
-
-  <view wx:if="{{shipment && !isLoading && !errorMessage}}" class="submit-bar">
     <button
       class="submit-button"
       loading="{{isSubmitting}}"

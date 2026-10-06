@@ -2,7 +2,7 @@
 
 .package-page {
   min-height: 100vh;
-  padding: 32rpx;
+  padding: 32rpx 32rpx 176rpx;
   box-sizing: border-box;
 }
 
@@ -45,18 +45,22 @@
 }
 
 .filter-bar {
-  margin: 32rpx -32rpx 20rpx;
-  padding: 0 32rpx;
+  width: 100%;
+  margin: 32rpx 0 20rpx;
+  padding: 0;
   white-space: nowrap;
   box-sizing: border-box;
 }
 
 .filter-items {
-  display: inline-flex;
+  display: flex;
+  width: max-content;
   gap: 16rpx;
+  padding-right: 120rpx;
 }
 
 .filter-item {
+  flex: 0 0 auto;
   padding: 12rpx 20rpx;
   border: 1rpx solid #d7d7d7;
   border-radius: 999rpx;
@@ -74,13 +78,18 @@
   display: flex;
   flex-direction: column;
   gap: 20rpx;
-  padding-bottom: 160rpx;
+  padding-bottom: 0;
 }
 
 .package-card {
   padding: 24rpx;
   border-radius: 16rpx;
   background: #ffffff;
+}
+
+.package-card-disabled {
+  background: #f2f2f2;
+  opacity: 0.62;
 }
 
 .card-header {
@@ -113,6 +122,11 @@
 .selection-mark-active {
   border-color: #1f1f1f;
   background: #1f1f1f;
+}
+
+.selection-mark-disabled {
+  border-color: #b9b9b9;
+  background: #e4e4e4;
 }
 
 .tracking-number {
@@ -185,9 +199,13 @@
 
 .consolidation-entry {
   position: fixed;
-  right: 32rpx;
-  bottom: 132rpx;
-  left: 32rpx;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 20rpx 32rpx;
+  border-top: 1rpx solid #dddddd;
+  background: #ffffff;
+  box-sizing: border-box;
 }
 
 .primary-button,
@@ -200,7 +218,7 @@
 .selection-bottom-bar {
   position: fixed;
   right: 0;
-  bottom: 100rpx;
+  bottom: 0;
   left: 0;
   display: flex;
   align-items: center;

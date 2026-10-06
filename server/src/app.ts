@@ -27,6 +27,31 @@ export async function buildApp(
   const app = Fastify({
     logger: options.logger ?? false
   });
+
+  // wx.request sends application/json by default, even for body-less DELETE and
+  // POST requests. Fastify's default JSON parser rejects that empty body before
+  // the request can reach its route. Treat an empty JSON body as undefined while
+  // preserving a structured 400 response for malformed non-empty JSON.
+  app.removeContentTypeParser("application/json");
+  app.addContentTypeParser(
+    "application/json",
+    { parseAs: "string" },
+    (_request, body, done) => {
+      const content = body.toString().trim();
+
+      if (!content) {
+        done(null, undefined);
+        return;
+      }
+
+      try {
+        done(null, JSON.parse(content));
+      } catch {
+        done(new AppError("INVALID_INPUT", 400, "请求正文不是有效 JSON。"));
+      }
+    }
+  );
+
   const database = createDatabase(options.config.sqliteDbPath);
   runMigrations(database);
   const packageRepository = new PackageRepository(database);
@@ -66,7 +91,14 @@ export async function buildApp(
       });
     }
 
-    request.log.error(error);
+    request.log.error(
+      {
+        err: error,
+        method: request.method,
+        requestPath: request.url
+      },
+      "Unhandled API error"
+    );
 
     return reply.status(500).send({
       error: {

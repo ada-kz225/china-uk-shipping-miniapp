@@ -2,7 +2,7 @@
 
 .create-page {
   min-height: 100vh;
-  padding: 32rpx 32rpx 180rpx;
+  padding: 32rpx;
   box-sizing: border-box;
 }
 
@@ -132,18 +132,9 @@
   font-size: 28rpx;
 }
 
-.submit-bar {
-  position: fixed;
-  right: 0;
-  bottom: 100rpx;
-  left: 0;
-  padding: 20rpx 32rpx;
-  border-top: 1rpx solid #dddddd;
-  background: #ffffff;
-  box-sizing: border-box;
-}
-
 .submit-button {
+  width: 100%;
+  margin: 0;
   background: #1f1f1f;
   color: #ffffff;
   font-size: 32rpx;

@@ -3,7 +3,8 @@ import {
   formatPackageDate,
   listPackages,
   type PackageDto,
-  type PackageFilter
+  type PackageFilter,
+  type PackageStatusCounts
 } from "../../services/packages";
 import { createShipmentDraft } from "../../services/shipments";
 
@@ -18,18 +19,18 @@ type PackageCard = PackageDto & {
   isSelected?: boolean;
 };
 
-const filters: FilterOption[] = [
-  { key: "all", label: "全部" },
-  { key: "inbound", label: "待到仓" },
-  { key: "pending_match", label: "待确认" },
-  { key: "ready", label: "可合箱" },
-  { key: "in_shipment", label: "已转运" },
-  { key: "needs_action", label: "需处理" }
-];
+const emptyStatusCounts: PackageStatusCounts = {
+  all: 0,
+  inbound: 0,
+  pending_match: 0,
+  ready: 0,
+  in_shipment: 0,
+  needs_action: 0
+};
 
 Page({
   data: {
-    filters,
+    filters: createFilters(emptyStatusCounts),
     selectedFilter: "all" as PackageFilter,
     packages: [] as PackageCard[],
     isLoading: false,
@@ -122,10 +123,6 @@ Page({
     }
 
     if (!item.isEligibleForShipment) {
-      wx.showToast({
-        title: item.selectionReason ?? "该包裹暂不可选。",
-        icon: "none"
-      });
       return;
     }
 
@@ -179,7 +176,8 @@ Page({
     });
 
     try {
-      const packages = await listPackages(this.data.selectedFilter);
+      const result = await listPackages(this.data.selectedFilter);
+      const packages = result.packages;
       const selectableIds = new Set(
         packages
           .filter((item) => item.isEligibleForShipment)
@@ -192,9 +190,8 @@ Page({
       this.setData({
         packages: packages.map(toPackageCard),
         selectedPackageIds,
-        readyPackageCount: packages.filter(
-          (item) => item.isEligibleForShipment
-        ).length
+        readyPackageCount: result.statusCounts.ready,
+        filters: createFilters(result.statusCounts)
       });
       this.applySelectionToCards();
     } catch (error) {
@@ -231,4 +228,15 @@ function toPackageCard(item: PackageDto): PackageCard {
     arrivedAtDisplay: formatPackageDate(item.arrivedAt),
     weightDisplay: item.weightG === null ? "" : item.weightG + " 克"
   };
+}
+
+function createFilters(statusCounts: PackageStatusCounts): FilterOption[] {
+  return [
+    { key: "all", label: "全部 " + statusCounts.all },
+    { key: "inbound", label: "待到仓 " + statusCounts.inbound },
+    { key: "pending_match", label: "待确认 " + statusCounts.pending_match },
+    { key: "ready", label: "可合箱 " + statusCounts.ready },
+    { key: "in_shipment", label: "已转运 " + statusCounts.in_shipment },
+    { key: "needs_action", label: "需处理 " + statusCounts.needs_action }
+  ];
 }
