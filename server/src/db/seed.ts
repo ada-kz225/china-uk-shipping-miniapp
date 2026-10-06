@@ -241,11 +241,11 @@ function insertPackages(database: SqliteDatabase): void {
 
 function insertShipments(database: SqliteDatabase): void {
   const statement = database.prepare(
-    [
-      "INSERT OR IGNORE INTO shipments (",
-      "id, reference, user_id, warehouse_id, address_id, status, submitted_at,",
-      "packing_completed_at, final_chargeable_weight_g, dispatched_at, created_at, updated_at",
-      ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      [
+        "INSERT OR IGNORE INTO shipments (",
+        "id, reference, user_id, warehouse_id, address_id, status, submitted_at,",
+        "packing_completed_at, final_weight_g, final_chargeable_weight_g, dispatched_at, created_at, updated_at",
+        ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     ].join(" ")
   );
 
@@ -259,6 +259,7 @@ function insertShipments(database: SqliteDatabase): void {
       shipment.status,
       "2026-09-30T10:00:00.000Z",
       shipment.finalWeightG ? "2026-09-30T12:00:00.000Z" : null,
+      shipment.finalWeightG,
       shipment.finalWeightG,
       shipment.dispatchedAt,
       seedTime,

@@ -60,6 +60,32 @@ export class PaymentRepository {
       .get(id) as Payment | undefined;
   }
 
+  findByIdempotencyKey(idempotencyKey: string): Payment | undefined {
+    return this.database
+      .prepare("SELECT " + paymentFields + " FROM payments WHERE idempotency_key = ?")
+      .get(idempotencyKey) as Payment | undefined;
+  }
+
+  findLatestByShipmentId(shipmentId: string): Payment | undefined {
+    return this.database
+      .prepare(
+        "SELECT " +
+          paymentFields +
+          " FROM payments WHERE shipment_id = ? ORDER BY created_at DESC LIMIT 1"
+      )
+      .get(shipmentId) as Payment | undefined;
+  }
+
+  hasSucceededPayment(shipmentId: string): boolean {
+    return Boolean(
+      this.database
+        .prepare(
+          "SELECT 1 AS existsFlag FROM payments WHERE shipment_id = ? AND status = 'SUCCEEDED' LIMIT 1"
+        )
+        .get(shipmentId)
+    );
+  }
+
   listByShipmentId(shipmentId: string): Payment[] {
     return this.database
       .prepare(
@@ -73,13 +99,14 @@ export class PaymentRepository {
   updateStatus(
     id: string,
     status: PaymentStatus,
-    completedAt: string | null
+    completedAt: string | null,
+    providerReference?: string | null
   ): Payment | undefined {
     this.database
       .prepare(
-        "UPDATE payments SET status = ?, completed_at = ? WHERE id = ?"
+        "UPDATE payments SET status = ?, completed_at = ?, provider_reference = COALESCE(?, provider_reference) WHERE id = ?"
       )
-      .run(status, completedAt, id);
+      .run(status, completedAt, providerReference ?? null, id);
 
     return this.findById(id);
   }

@@ -21,7 +21,12 @@ export class ApiError extends Error {
   }
 }
 
-function request<T>(method: HttpMethod, path: string, data?: unknown): Promise<T> {
+function request<T>(
+  method: HttpMethod,
+  path: string,
+  data?: unknown,
+  extraHeaders: Record<string, string> = {}
+): Promise<T> {
   return new Promise((resolve, reject) => {
     const hasBody = data !== undefined;
 
@@ -32,7 +37,8 @@ function request<T>(method: HttpMethod, path: string, data?: unknown): Promise<T
       header: {
         "X-Demo-User-Id": environmentConfig.demoUserId,
         // Avoid the platform default application/json header when no body exists.
-        "content-type": hasBody ? "application/json" : "text/plain"
+        "content-type": hasBody ? "application/json" : "text/plain",
+        ...extraHeaders
       },
       success(response) {
         if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -82,8 +88,12 @@ export const apiClient = {
   get<T>(path: string): Promise<T> {
     return request<T>("GET", path);
   },
-  post<T>(path: string, data?: unknown): Promise<T> {
-    return request<T>("POST", path, data);
+  post<T>(
+    path: string,
+    data?: unknown,
+    headers?: Record<string, string>
+  ): Promise<T> {
+    return request<T>("POST", path, data, headers);
   },
   delete<T>(path: string): Promise<T> {
     return request<T>("DELETE", path);

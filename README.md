@@ -2,9 +2,9 @@
 
 一个从 0 到 1 设计并实现的个人 Portfolio MVP，面向需要从中国寄送多个包裹到英国的个人用户。项目文档完整保留了产品研究、用户验证、产品定义、交互设计、PRD、可点击原型与技术设计过程。
 
-> 当前阶段：**Development — Phase 3：Shipment Consolidation**
+> 当前阶段：**Development — Phase 4：Quote + Payment Simulation**
 >
-> 当前已完成多 Package 选择、Shipment 草稿、英国地址、提交与原子锁定。报价、付款、物流、异常工作流与首页数据仍未开始实现。
+> 当前已完成多 Package 选择、Shipment 草稿、英国地址、提交与原子锁定，以及模拟仓库处理、最终重量、Quote Snapshot 与模拟付款。出库、物流、异常工作流与首页数据仍未开始实现。
 
 ## 当前能力
 
@@ -21,6 +21,9 @@
 - Shipment 草稿、英国地址快照、提交、取消草稿与稳定转运单号；
 - Package 资格校验与提交时的原子锁定；
 - Shipment 用户 API、列表、详情、创建转运单页面；
+- Mock Ops 仓库处理、最终重量记录和最终报价生成；
+- 不可静默改写的 Quote Snapshot 与费用明细展示；
+- 模拟 Payment Attempt、成功 / 失败结果和“已付款，等待仓库发出”状态；
 - Vitest 健康检查、数据库约束、Package / Shipment Service 与 API 测试；
 - 小程序 API Client 与微信官方 TypeScript API 类型声明。
 
@@ -131,9 +134,8 @@ Package 页会请求开发环境 API。当前默认地址为 `http://127.0.0.1:3
 
 以下能力已在 PRD 与技术设计中定义，但明确留在后续 Phase：
 
-- Quote、模拟付款和出库闸门业务逻辑；
 - 国际运输、清关、英国派送与签收业务逻辑；
-- Exception 工作流，以及 Shipment / Quote / Payment / Tracking 的 Mock Ops；
+- Exception 工作流，以及出库 / Tracking 的 Mock Ops；
 - 真实微信登录、真实微信支付、真实仓库 / 物流 API。
 
 ## 文档导航

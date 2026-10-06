@@ -13,7 +13,13 @@ export class AppError extends Error {
       | "SHIPMENT_NOT_FOUND"
       | "FORBIDDEN"
       | "INVALID_STATE_TRANSITION"
-      | "INVALID_SHIPMENT_STATE",
+      | "INVALID_SHIPMENT_STATE"
+      | "QUOTE_NOT_READY"
+      | "QUOTE_ALREADY_EXISTS"
+      | "INVALID_WEIGHT"
+      | "INVALID_AMOUNT"
+      | "PAYMENT_ALREADY_COMPLETED"
+      | "PAYMENT_FAILED",
     public readonly statusCode: number,
     message: string,
     public readonly fieldErrors: FieldError[] = []

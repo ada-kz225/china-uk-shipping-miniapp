@@ -15,6 +15,7 @@ export type CreateShipmentInput = {
   status: ShipmentStatus;
   submittedAt?: string | null;
   packingCompletedAt?: string | null;
+  finalWeightG?: number | null;
   finalChargeableWeightG?: number | null;
   dispatchedAt?: string | null;
 };
@@ -27,6 +28,7 @@ export type UpdateShipmentInput = Partial<
     | "status"
     | "submittedAt"
     | "packingCompletedAt"
+    | "finalWeightG"
     | "finalChargeableWeightG"
     | "dispatchedAt"
   >
@@ -49,6 +51,7 @@ const shipmentFields = [
   "status",
   "submitted_at AS submittedAt",
   "packing_completed_at AS packingCompletedAt",
+  "final_weight_g AS finalWeightG",
   "final_chargeable_weight_g AS finalChargeableWeightG",
   "dispatched_at AS dispatchedAt",
   "version",
@@ -82,8 +85,8 @@ export class ShipmentRepository {
         [
           "INSERT INTO shipments (",
           "id, reference, user_id, warehouse_id, address_id, status, submitted_at,",
-          "packing_completed_at, final_chargeable_weight_g, dispatched_at, created_at, updated_at",
-          ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+          "packing_completed_at, final_weight_g, final_chargeable_weight_g, dispatched_at, created_at, updated_at",
+          ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         ].join(" ")
       )
       .run(
@@ -95,6 +98,7 @@ export class ShipmentRepository {
         input.status,
         input.submittedAt ?? null,
         input.packingCompletedAt ?? null,
+        input.finalWeightG ?? null,
         input.finalChargeableWeightG ?? null,
         input.dispatchedAt ?? null,
         timestamp,
@@ -161,6 +165,7 @@ export class ShipmentRepository {
       status: "status",
       submittedAt: "submitted_at",
       packingCompletedAt: "packing_completed_at",
+      finalWeightG: "final_weight_g",
       finalChargeableWeightG: "final_chargeable_weight_g",
       dispatchedAt: "dispatched_at"
     };

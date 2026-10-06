@@ -30,6 +30,7 @@ export type Shipment = {
   status: ShipmentStatus;
   submittedAt: string | null;
   packingCompletedAt: string | null;
+  finalWeightG: number | null;
   finalChargeableWeightG: number | null;
   dispatchedAt: string | null;
   version: number;

@@ -1,5 +1,5 @@
-import type { Address, Shipment } from "../domain/index.js";
-import { ShipmentStatus } from "../domain/index.js";
+import type { Address, Payment, Quote, Shipment } from "../domain/index.js";
+import { PaymentStatus, ShipmentStatus } from "../domain/index.js";
 import type { ShipmentDetails } from "../services/shipment-service.js";
 import { presentPackage, type PackageDto } from "./package-presenter.js";
 
@@ -22,13 +22,13 @@ const shipmentCopy: Record<ShipmentStatus, ShipmentCopy> = {
   },
   [ShipmentStatus.WAREHOUSE_PROCESSING]: {
     label: "仓库正在处理",
-    description: "仓库正在检查、打包和称重。",
-    nextAction: "当前无需操作；如需补充信息会明确提示。"
+    description: "仓库正在打包并确认本次转运的最终重量。",
+    nextAction: "等待仓库完成处理并生成报价。"
   },
   [ShipmentStatus.AWAITING_PAYMENT]: {
     label: "最终报价已生成，请确认并付款",
     description: "本次最终计费重量和费用已经生成。",
-    nextAction: "报价与付款将在后续阶段开放。"
+    nextAction: "请核对报价后确认并模拟付款。"
   },
   [ShipmentStatus.PAYMENT_PROCESSING]: {
     label: "正在确认付款结果",
@@ -90,7 +90,31 @@ export type ShipmentDto = {
   submittedAt: string | null;
   packages?: PackageDto[];
   address?: AddressDto | null;
+  quote?: QuoteDto | null;
+  latestPayment?: PaymentDto | null;
   unselectedReadyPackageCount?: number;
+};
+
+type QuoteDto = {
+  finalWeightG: number;
+  finalWeightDisplay: string;
+  chargeableWeightG: number;
+  chargeableWeightDisplay: string;
+  shippingFeeMinor: number;
+  shippingFeeDisplay: string;
+  serviceFeeMinor: number;
+  serviceFeeDisplay: string;
+  totalAmountMinor: number;
+  totalAmountDisplay: string;
+  currency: string;
+  generatedAt: string;
+};
+
+type PaymentDto = {
+  status: PaymentStatus;
+  statusLabel: string;
+  statusDescription: string;
+  completedAt: string | null;
 };
 
 type AddressDto = {
@@ -135,11 +159,73 @@ export function presentShipmentDetail(entity: ShipmentDetails): ShipmentDto {
     submittedAt: entity.submittedAt,
     packages: entity.packages.map((item) => presentPackage(item)),
     address: entity.address ? presentAddress(entity.address) : null,
+    quote: entity.quote ? presentQuote(entity.quote) : null,
+    latestPayment: entity.latestPayment
+      ? presentLatestPayment(entity.latestPayment)
+      : null,
     unselectedReadyPackageCount:
       entity.status === ShipmentStatus.DRAFT
         ? Math.max(entity.readyPackageCount - entity.packages.length, 0)
         : undefined
   };
+}
+
+function presentQuote(entity: Quote): QuoteDto {
+  return {
+    finalWeightG: entity.finalWeightG,
+    finalWeightDisplay: formatWeight(entity.finalWeightG),
+    chargeableWeightG: entity.chargeableWeightG,
+    chargeableWeightDisplay: formatWeight(entity.chargeableWeightG),
+    shippingFeeMinor: entity.shippingFeeMinor,
+    shippingFeeDisplay: formatAmount(entity.shippingFeeMinor, entity.currency),
+    serviceFeeMinor: entity.serviceFeeMinor,
+    serviceFeeDisplay: formatAmount(entity.serviceFeeMinor, entity.currency),
+    totalAmountMinor: entity.totalAmountMinor,
+    totalAmountDisplay: formatAmount(entity.totalAmountMinor, entity.currency),
+    currency: entity.currency,
+    generatedAt: entity.createdAt
+  };
+}
+
+function presentLatestPayment(entity: Payment): PaymentDto {
+  const copy: Record<PaymentStatus, Omit<PaymentDto, "status" | "completedAt">> = {
+    [PaymentStatus.PROCESSING]: {
+      statusLabel: "付款处理中",
+      statusDescription: "正在确认付款结果，请勿重复操作。"
+    },
+    [PaymentStatus.SUCCEEDED]: {
+      statusLabel: "付款成功",
+      statusDescription: "付款已成功，仓库正在安排出库。"
+    },
+    [PaymentStatus.FAILED]: {
+      statusLabel: "付款未完成",
+      statusDescription: "本次付款未成功，请重新尝试。"
+    },
+    [PaymentStatus.UNKNOWN]: {
+      statusLabel: "付款结果待确认",
+      statusDescription: "暂未确认付款结果，请稍后刷新后再试。"
+    }
+  };
+
+  return {
+    status: entity.status,
+    completedAt: entity.completedAt,
+    ...copy[entity.status]
+  };
+}
+
+function formatWeight(weightG: number): string {
+  return (weightG / 1000).toFixed(2) + " 千克";
+}
+
+function formatAmount(amountMinor: number, currency: string): string {
+  const prefixByCurrency: Record<string, string> = {
+    GBP: "£",
+    CNY: "¥"
+  };
+  const prefix = prefixByCurrency[currency] ?? currency + " ";
+
+  return prefix + (amountMinor / 100).toFixed(2);
 }
 
 function presentAddress(entity: Address): AddressDto {

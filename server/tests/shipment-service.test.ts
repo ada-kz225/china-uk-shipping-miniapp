@@ -6,6 +6,8 @@ import { AddressRepository } from "../src/repositories/address-repository.js";
 import { AuditLogRepository } from "../src/repositories/audit-log-repository.js";
 import { ExceptionRepository } from "../src/repositories/exception-repository.js";
 import { PackageRepository } from "../src/repositories/package-repository.js";
+import { PaymentRepository } from "../src/repositories/payment-repository.js";
+import { QuoteRepository } from "../src/repositories/quote-repository.js";
 import { ShipmentRepository } from "../src/repositories/shipment-repository.js";
 import { ShipmentService } from "../src/services/shipment-service.js";
 import { AppError } from "../src/utils/app-error.js";
@@ -26,6 +28,8 @@ describe("ShipmentService", () => {
     database = createTestDatabase();
     const packageRepository = new PackageRepository(database);
     const shipmentRepository = new ShipmentRepository(database);
+    const quoteRepository = new QuoteRepository(database);
+    const paymentRepository = new PaymentRepository(database);
     const auditLogRepository = new AuditLogRepository(database);
     const service = new ShipmentService(
       database,
@@ -33,6 +37,8 @@ describe("ShipmentService", () => {
       packageRepository,
       new ExceptionRepository(database),
       new AddressRepository(database),
+      quoteRepository,
+      paymentRepository,
       auditLogRepository
     );
     const primary = insertUserWarehouseAndAddress(database, "primary");
@@ -42,6 +48,8 @@ describe("ShipmentService", () => {
       service,
       packageRepository,
       shipmentRepository,
+      quoteRepository,
+      paymentRepository,
       auditLogRepository,
       primary,
       secondary

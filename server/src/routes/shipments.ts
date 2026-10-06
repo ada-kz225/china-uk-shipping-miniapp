@@ -6,6 +6,7 @@ import {
   presentShipmentSummary
 } from "../presenters/shipment-presenter.js";
 import { ShipmentService, type ShipmentScope } from "../services/shipment-service.js";
+import { PaymentService } from "../services/payment-service.js";
 import { AppError, type FieldError } from "../utils/app-error.js";
 import { getCurrentDemoUserId } from "./request-context.js";
 
@@ -51,6 +52,7 @@ const shipmentListQuerySchema = z
 
 type ShipmentRouteOptions = {
   shipmentService: ShipmentService;
+  paymentService: PaymentService;
 };
 
 export async function registerShipmentRoutes(
@@ -129,6 +131,34 @@ export async function registerShipmentRoutes(
 
     return { data: result };
   });
+
+  app.post("/shipments/:id/payments", async (request) => {
+    const userId = getCurrentDemoUserId(request);
+    const params = parseRequest(shipmentParamsSchema, request.params);
+    const idempotencyKey = getIdempotencyKey(request);
+    const payment = options.paymentService.createPaymentAttempt(
+      userId,
+      params.id,
+      idempotencyKey
+    );
+    options.paymentService.markPaymentSuccess(payment.id);
+    const shipment = options.shipmentService.getShipment(userId, params.id);
+
+    return { data: presentShipmentDetail(shipment) };
+  });
+}
+
+function getIdempotencyKey(request: { headers: Record<string, string | string[] | undefined> }): string {
+  const value = request.headers["idempotency-key"];
+  const idempotencyKey = (Array.isArray(value) ? value[0] : value)?.trim();
+
+  if (!idempotencyKey) {
+    throw new AppError("INVALID_INPUT", 400, "缺少付款请求标识，请重试。", [
+      { field: "Idempotency-Key", message: "缺少付款请求标识，请重试。" }
+    ]);
+  }
+
+  return idempotencyKey;
 }
 
 function parseRequest<T>(schema: z.ZodType<T>, value: unknown): T {

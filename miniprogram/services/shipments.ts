@@ -23,7 +23,31 @@ export type ShipmentDto = {
   submittedAt: string | null;
   packages?: PackageDto[];
   address?: UKAddressInput | null;
+  quote?: QuoteDto | null;
+  latestPayment?: PaymentDto | null;
   unselectedReadyPackageCount?: number;
+};
+
+export type QuoteDto = {
+  finalWeightG: number;
+  finalWeightDisplay: string;
+  chargeableWeightG: number;
+  chargeableWeightDisplay: string;
+  shippingFeeMinor: number;
+  shippingFeeDisplay: string;
+  serviceFeeMinor: number;
+  serviceFeeDisplay: string;
+  totalAmountMinor: number;
+  totalAmountDisplay: string;
+  currency: string;
+  generatedAt: string;
+};
+
+export type PaymentDto = {
+  status: string;
+  statusLabel: string;
+  statusDescription: string;
+  completedAt: string | null;
 };
 
 type ShipmentResponse = {
@@ -86,10 +110,24 @@ export function cancelShipmentDraft(shipmentId: string): Promise<void> {
     .then(() => undefined);
 }
 
+export function simulateShipmentPayment(shipmentId: string): Promise<ShipmentDto> {
+  return apiClient
+    .post<ShipmentResponse>(
+      "/shipments/" + encodeURIComponent(shipmentId) + "/payments",
+      undefined,
+      { "Idempotency-Key": createPaymentIdempotencyKey() }
+    )
+    .then((response) => response.data);
+}
+
 export function formatShipmentDate(value: string | null): string {
   if (!value) {
     return "";
   }
 
   return value.replace("T", " ").slice(0, 16);
+}
+
+function createPaymentIdempotencyKey(): string {
+  return "mini-payment-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
 }

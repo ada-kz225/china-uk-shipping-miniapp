@@ -7,12 +7,17 @@ import { AuditLogRepository } from "./repositories/audit-log-repository.js";
 import { AddressRepository } from "./repositories/address-repository.js";
 import { ExceptionRepository } from "./repositories/exception-repository.js";
 import { PackageRepository } from "./repositories/package-repository.js";
+import { PaymentRepository } from "./repositories/payment-repository.js";
+import { QuoteRepository } from "./repositories/quote-repository.js";
 import { ShipmentRepository } from "./repositories/shipment-repository.js";
 import { registerHealthRoute } from "./routes/health.js";
 import { registerMockPackageRoutes } from "./routes/mock-packages.js";
+import { registerMockShipmentRoutes } from "./routes/mock-shipments.js";
 import { registerPackageRoutes } from "./routes/packages.js";
 import { registerShipmentRoutes } from "./routes/shipments.js";
 import { PackageService } from "./services/package-service.js";
+import { PaymentService } from "./services/payment-service.js";
+import { QuoteService } from "./services/quote-service.js";
 import { ShipmentService } from "./services/shipment-service.js";
 import { AppError } from "./utils/app-error.js";
 
@@ -56,6 +61,8 @@ export async function buildApp(
   runMigrations(database);
   const packageRepository = new PackageRepository(database);
   const shipmentRepository = new ShipmentRepository(database);
+  const quoteRepository = new QuoteRepository(database);
+  const paymentRepository = new PaymentRepository(database);
   const addressRepository = new AddressRepository(database);
   const exceptionRepository = new ExceptionRepository(database);
   const auditLogRepository = new AuditLogRepository(database);
@@ -71,6 +78,23 @@ export async function buildApp(
     packageRepository,
     exceptionRepository,
     addressRepository,
+    quoteRepository,
+    paymentRepository,
+    auditLogRepository
+  );
+  const quoteService = new QuoteService(
+    database,
+    shipmentRepository,
+    quoteRepository,
+    exceptionRepository,
+    auditLogRepository
+  );
+  const paymentService = new PaymentService(
+    database,
+    shipmentRepository,
+    quoteRepository,
+    paymentRepository,
+    exceptionRepository,
     auditLogRepository
   );
 
@@ -110,11 +134,17 @@ export async function buildApp(
 
   await registerHealthRoute(app, { database });
   await registerPackageRoutes(app, { packageService });
-  await registerShipmentRoutes(app, { shipmentService });
+  await registerShipmentRoutes(app, { shipmentService, paymentService });
 
   if (options.config.environment !== "production") {
     await registerMockPackageRoutes(app, {
       packageService,
+      demoOpsKey: options.config.demoOpsKey
+    });
+    await registerMockShipmentRoutes(app, {
+      shipmentService,
+      quoteService,
+      paymentService,
       demoOpsKey: options.config.demoOpsKey
     });
   }

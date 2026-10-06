@@ -18,6 +18,56 @@
       <button wx:if="{{shipment.status === 'DRAFT'}}" class="draft-button" bindtap="onContinueDraftTap">继续完善本次转运</button>
     </view>
 
+    <view wx:if="{{shipment.quote}}" class="information-card quote-card">
+      <view class="quote-heading">
+        <text class="section-title">最终报价</text>
+        <text class="mock-note">模拟报价</text>
+      </view>
+      <view class="quote-row">
+        <text>最终重量</text>
+        <text>{{shipment.quote.finalWeightDisplay}}</text>
+      </view>
+      <view class="quote-row">
+        <text>最终计费重量</text>
+        <text>{{shipment.quote.chargeableWeightDisplay}}</text>
+      </view>
+      <view class="quote-row">
+        <text>运费</text>
+        <text>{{shipment.quote.shippingFeeDisplay}}</text>
+      </view>
+      <view class="quote-row">
+        <text>打包费</text>
+        <text>{{shipment.quote.serviceFeeDisplay}}</text>
+      </view>
+      <view class="quote-row quote-total">
+        <text>总价</text>
+        <text>{{shipment.quote.totalAmountDisplay}}</text>
+      </view>
+      <text class="quote-time">报价生成时间：{{shipment.quoteGeneratedAtDisplay}}</text>
+
+      <view wx:if="{{shipment.latestPayment && shipment.latestPayment.status === 'FAILED'}}" class="payment-note payment-note-failed">
+        <text>{{shipment.latestPayment.statusLabel}}</text>
+        <text>{{shipment.latestPayment.statusDescription}}</text>
+      </view>
+      <view wx:if="{{isPaying || shipment.status === 'PAYMENT_PROCESSING'}}" class="payment-note">
+        <text>付款处理中</text>
+        <text>正在确认付款结果，请勿重复操作。</text>
+      </view>
+      <button
+        wx:if="{{shipment.status === 'AWAITING_PAYMENT'}}"
+        class="payment-button"
+        loading="{{isPaying}}"
+        disabled="{{isPaying}}"
+        bindtap="onPaymentTap"
+      >
+        {{isPaying ? '付款处理中' : '确认并模拟付款'}}
+      </button>
+      <view wx:if="{{shipment.status === 'PAID_AWAITING_DISPATCH'}}" class="payment-note payment-note-success">
+        <text>费用已支付成功，仓库正在安排出库。</text>
+        <text>当前无需操作，转运单尚未实际离开仓库。</text>
+      </view>
+    </view>
+
     <view class="information-card">
       <text class="section-title">包含的包裹</text>
       <view

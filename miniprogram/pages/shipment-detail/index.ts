@@ -2,6 +2,7 @@ import { ApiError } from "../../services/api";
 import {
   formatShipmentDate,
   getShipment,
+  simulateShipmentPayment,
   type ShipmentDto
 } from "../../services/shipments";
 
@@ -9,6 +10,7 @@ type ShipmentDetail = ShipmentDto & {
   referenceDisplay: string;
   createdAtDisplay: string;
   submittedAtDisplay: string;
+  quoteGeneratedAtDisplay: string;
 };
 
 Page({
@@ -16,6 +18,7 @@ Page({
     shipmentId: "",
     shipment: null as ShipmentDetail | null,
     isLoading: false,
+    isPaying: false,
     errorMessage: ""
   },
 
@@ -55,6 +58,30 @@ Page({
     });
   },
 
+  async onPaymentTap() {
+    if (this.data.isPaying || !this.data.shipment) {
+      return;
+    }
+
+    this.setData({ isPaying: true });
+
+    try {
+      // Keep the simulated confirmation state visible long enough to prevent
+      // repeated taps and make the payment transition understandable.
+      await wait(350);
+      const shipment = await simulateShipmentPayment(this.data.shipmentId);
+      this.setData({ shipment: toShipmentDetail(shipment) });
+      wx.showToast({ title: "模拟付款成功", icon: "success" });
+    } catch (error) {
+      wx.showToast({
+        title: error instanceof ApiError ? error.message : "付款未完成，请重新尝试。",
+        icon: "none"
+      });
+    } finally {
+      this.setData({ isPaying: false });
+    }
+  },
+
   async loadShipment(stopPullDownRefresh = false) {
     if (!this.data.shipmentId) {
       return;
@@ -86,6 +113,15 @@ function toShipmentDetail(item: ShipmentDto): ShipmentDetail {
     ...item,
     referenceDisplay: item.reference ?? "草稿转运",
     createdAtDisplay: formatShipmentDate(item.createdAt),
-    submittedAtDisplay: formatShipmentDate(item.submittedAt)
+    submittedAtDisplay: formatShipmentDate(item.submittedAt),
+    quoteGeneratedAtDisplay: item.quote
+      ? formatShipmentDate(item.quote.generatedAt)
+      : ""
   };
+}
+
+function wait(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
 }

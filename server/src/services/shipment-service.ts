@@ -3,6 +3,8 @@ import type { SqliteDatabase } from "../db/database.js";
 import type {
   Address,
   Package,
+  Payment,
+  Quote,
   Shipment,
   ShipmentStatus
 } from "../domain/index.js";
@@ -18,6 +20,8 @@ import { AddressRepository } from "../repositories/address-repository.js";
 import { AuditLogRepository } from "../repositories/audit-log-repository.js";
 import { ExceptionRepository } from "../repositories/exception-repository.js";
 import { PackageRepository } from "../repositories/package-repository.js";
+import { PaymentRepository } from "../repositories/payment-repository.js";
+import { QuoteRepository } from "../repositories/quote-repository.js";
 import {
   ShipmentRepository,
   type ShipmentListItem,
@@ -37,6 +41,8 @@ export type ShipmentScope = "active" | "history";
 export type ShipmentDetails = ShipmentWithPackages & {
   address: Address | undefined;
   readyPackageCount: number;
+  quote: Quote | undefined;
+  latestPayment: Payment | undefined;
 };
 
 const historyStatuses = [
@@ -51,6 +57,8 @@ export class ShipmentService {
     private readonly packageRepository: PackageRepository,
     private readonly exceptionRepository: ExceptionRepository,
     private readonly addressRepository: AddressRepository,
+    private readonly quoteRepository: QuoteRepository,
+    private readonly paymentRepository: PaymentRepository,
     private readonly auditLogRepository: AuditLogRepository
   ) {}
 
@@ -87,7 +95,9 @@ export class ShipmentService {
       address: entity.addressId
         ? this.addressRepository.findById(entity.addressId)
         : undefined,
-      readyPackageCount: this.shipmentRepository.countReadyPackagesForUser(userId)
+      readyPackageCount: this.shipmentRepository.countReadyPackagesForUser(userId),
+      quote: this.quoteRepository.findByShipmentId(entity.id),
+      latestPayment: this.paymentRepository.findLatestByShipmentId(entity.id)
     };
   }
 
@@ -242,6 +252,41 @@ export class ShipmentService {
       });
 
       return { shipmentId };
+    })();
+  }
+
+  startWarehouseProcessing(
+    shipmentId: string,
+    actorId = "mock-ops"
+  ): Shipment {
+    return this.database.transaction(() => {
+      const shipment = this.findRequiredShipment(shipmentId);
+
+      if (this.exceptionRepository.findOpenByShipmentId(shipment.id)?.isBlocking) {
+        throw new AppError(
+          "INVALID_SHIPMENT_STATE",
+          409,
+          "当前转运单存在需要处理的问题，暂不能开始仓库处理。"
+        );
+      }
+
+      const nextStatus = this.validateStatusTransition(
+        shipment.status,
+        ShipmentEvent.START_WAREHOUSE_PROCESSING
+      );
+      const updated = this.shipmentRepository.update(shipment.id, {
+        status: nextStatus
+      }) as Shipment;
+      this.auditLogRepository.create({
+        actorType: "MOCK_OPS",
+        actorId,
+        action: "WAREHOUSE_PROCESSING_STARTED",
+        entityType: "SHIPMENT",
+        entityId: shipment.id,
+        metadata: { from: shipment.status, to: updated.status }
+      });
+
+      return updated;
     })();
   }
 

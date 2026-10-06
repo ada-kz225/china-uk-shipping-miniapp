@@ -2,7 +2,12 @@ import { ShipmentStatus } from "./statuses.js";
 import { AppError } from "../utils/app-error.js";
 
 export enum ShipmentEvent {
-  SUBMIT_SHIPMENT = "SUBMIT_SHIPMENT"
+  SUBMIT_SHIPMENT = "SUBMIT_SHIPMENT",
+  START_WAREHOUSE_PROCESSING = "START_WAREHOUSE_PROCESSING",
+  GENERATE_QUOTE = "GENERATE_QUOTE",
+  START_PAYMENT = "START_PAYMENT",
+  PAYMENT_SUCCEEDED = "PAYMENT_SUCCEEDED",
+  PAYMENT_FAILED = "PAYMENT_FAILED"
 }
 
 const transitions: Record<
@@ -12,6 +17,26 @@ const transitions: Record<
   [ShipmentEvent.SUBMIT_SHIPMENT]: {
     from: ShipmentStatus.DRAFT,
     to: ShipmentStatus.SUBMITTED
+  },
+  [ShipmentEvent.START_WAREHOUSE_PROCESSING]: {
+    from: ShipmentStatus.SUBMITTED,
+    to: ShipmentStatus.WAREHOUSE_PROCESSING
+  },
+  [ShipmentEvent.GENERATE_QUOTE]: {
+    from: ShipmentStatus.WAREHOUSE_PROCESSING,
+    to: ShipmentStatus.AWAITING_PAYMENT
+  },
+  [ShipmentEvent.START_PAYMENT]: {
+    from: ShipmentStatus.AWAITING_PAYMENT,
+    to: ShipmentStatus.PAYMENT_PROCESSING
+  },
+  [ShipmentEvent.PAYMENT_SUCCEEDED]: {
+    from: ShipmentStatus.PAYMENT_PROCESSING,
+    to: ShipmentStatus.PAID_AWAITING_DISPATCH
+  },
+  [ShipmentEvent.PAYMENT_FAILED]: {
+    from: ShipmentStatus.PAYMENT_PROCESSING,
+    to: ShipmentStatus.AWAITING_PAYMENT
   }
 };
 
