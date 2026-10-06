@@ -3,7 +3,10 @@ import { z } from "zod";
 
 import { PaymentService } from "../services/payment-service.js";
 import { QuoteService } from "../services/quote-service.js";
+import { DispatchService } from "../services/dispatch-service.js";
 import { ShipmentService } from "../services/shipment-service.js";
+import { TrackingService } from "../services/tracking-service.js";
+import { TrackingEventType } from "../domain/index.js";
 import { AppError } from "../utils/app-error.js";
 import { verifyDemoOpsKey } from "./request-context.js";
 
@@ -39,6 +42,8 @@ type MockShipmentRouteOptions = {
   shipmentService: ShipmentService;
   quoteService: QuoteService;
   paymentService: PaymentService;
+  dispatchService: DispatchService;
+  trackingService: TrackingService;
   demoOpsKey: string;
 };
 
@@ -83,6 +88,61 @@ export async function registerMockShipmentRoutes(
     );
 
     return { data: { id: payment.id, status: payment.status } };
+  });
+
+  app.post("/internal/mock/shipments/:id/dispatch", async (request) => {
+    const params = parse(shipmentParamsSchema, request.params);
+    verifyDemoOpsKey(request, options.demoOpsKey);
+    const shipment = options.dispatchService.dispatchShipment(params.id);
+
+    return { data: { id: shipment.id, status: shipment.status } };
+  });
+
+  registerTrackingRoute(
+    app,
+    options,
+    "/internal/mock/shipments/:id/start-international-transit",
+    TrackingEventType.INTERNATIONAL_TRANSIT
+  );
+  registerTrackingRoute(
+    app,
+    options,
+    "/internal/mock/shipments/:id/start-customs-clearance",
+    TrackingEventType.CUSTOMS_CLEARANCE
+  );
+  registerTrackingRoute(
+    app,
+    options,
+    "/internal/mock/shipments/:id/start-uk-last-mile",
+    TrackingEventType.UK_LAST_MILE
+  );
+  registerTrackingRoute(
+    app,
+    options,
+    "/internal/mock/shipments/:id/mark-delivered",
+    TrackingEventType.DELIVERED
+  );
+}
+
+function registerTrackingRoute(
+  app: FastifyInstance,
+  options: MockShipmentRouteOptions,
+  url: string,
+  stage:
+    | TrackingEventType.INTERNATIONAL_TRANSIT
+    | TrackingEventType.CUSTOMS_CLEARANCE
+    | TrackingEventType.UK_LAST_MILE
+    | TrackingEventType.DELIVERED
+): void {
+  app.post(url, async (request) => {
+    const params = parse(shipmentParamsSchema, request.params);
+    verifyDemoOpsKey(request, options.demoOpsKey);
+    const shipment = options.trackingService.advanceShipmentStage(
+      params.id,
+      stage
+    );
+
+    return { data: { id: shipment.id, status: shipment.status } };
   });
 }
 

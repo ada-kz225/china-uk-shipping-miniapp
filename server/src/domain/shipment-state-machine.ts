@@ -7,7 +7,12 @@ export enum ShipmentEvent {
   GENERATE_QUOTE = "GENERATE_QUOTE",
   START_PAYMENT = "START_PAYMENT",
   PAYMENT_SUCCEEDED = "PAYMENT_SUCCEEDED",
-  PAYMENT_FAILED = "PAYMENT_FAILED"
+  PAYMENT_FAILED = "PAYMENT_FAILED",
+  DISPATCH_SHIPMENT = "DISPATCH_SHIPMENT",
+  ENTER_INTERNATIONAL_TRANSIT = "ENTER_INTERNATIONAL_TRANSIT",
+  ENTER_CUSTOMS_CLEARANCE = "ENTER_CUSTOMS_CLEARANCE",
+  ENTER_UK_LAST_MILE = "ENTER_UK_LAST_MILE",
+  MARK_DELIVERED = "MARK_DELIVERED"
 }
 
 const transitions: Record<
@@ -37,6 +42,26 @@ const transitions: Record<
   [ShipmentEvent.PAYMENT_FAILED]: {
     from: ShipmentStatus.PAYMENT_PROCESSING,
     to: ShipmentStatus.AWAITING_PAYMENT
+  },
+  [ShipmentEvent.DISPATCH_SHIPMENT]: {
+    from: ShipmentStatus.PAID_AWAITING_DISPATCH,
+    to: ShipmentStatus.DISPATCHED
+  },
+  [ShipmentEvent.ENTER_INTERNATIONAL_TRANSIT]: {
+    from: ShipmentStatus.DISPATCHED,
+    to: ShipmentStatus.INTERNATIONAL_TRANSIT
+  },
+  [ShipmentEvent.ENTER_CUSTOMS_CLEARANCE]: {
+    from: ShipmentStatus.INTERNATIONAL_TRANSIT,
+    to: ShipmentStatus.CUSTOMS_CLEARANCE
+  },
+  [ShipmentEvent.ENTER_UK_LAST_MILE]: {
+    from: ShipmentStatus.CUSTOMS_CLEARANCE,
+    to: ShipmentStatus.UK_LAST_MILE
+  },
+  [ShipmentEvent.MARK_DELIVERED]: {
+    from: ShipmentStatus.UK_LAST_MILE,
+    to: ShipmentStatus.DELIVERED
   }
 };
 

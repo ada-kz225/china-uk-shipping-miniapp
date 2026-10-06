@@ -1,6 +1,13 @@
-import type { Address, Payment, Quote, Shipment } from "../domain/index.js";
+import type {
+  Address,
+  Payment,
+  Quote,
+  Shipment,
+  TrackingEvent
+} from "../domain/index.js";
 import { PaymentStatus, ShipmentStatus } from "../domain/index.js";
 import type { ShipmentDetails } from "../services/shipment-service.js";
+import { getTrackingEventDescription } from "../services/tracking-service.js";
 import { presentPackage, type PackageDto } from "./package-presenter.js";
 
 type ShipmentCopy = {
@@ -43,27 +50,27 @@ const shipmentCopy: Record<ShipmentStatus, ShipmentCopy> = {
   [ShipmentStatus.DISPATCHED]: {
     label: "已从仓库发出",
     description: "仓库已确认本次转运实际离仓。",
-    nextAction: "可查看运输进度。"
+    nextAction: "当前无需操作，等待进入国际运输。"
   },
   [ShipmentStatus.INTERNATIONAL_TRANSIT]: {
     label: "国际运输中",
     description: "转运单正在跨境运输中。",
-    nextAction: "当前无需操作；可查看最近运输进度。"
+    nextAction: "当前无需操作，等待清关。"
   },
   [ShipmentStatus.CUSTOMS_CLEARANCE]: {
-    label: "清关中",
+    label: "清关处理中",
     description: "转运单正在清关阶段。",
-    nextAction: "默认无需操作；如需配合会明确提示。"
+    nextAction: "当前无需操作，等待完成清关。"
   },
   [ShipmentStatus.UK_LAST_MILE]: {
     label: "英国派送中",
     description: "转运单已进入英国本地派送阶段。",
-    nextAction: "当前无需操作；等待签收或按异常指引处理。"
+    nextAction: "请留意末端派送信息。"
   },
   [ShipmentStatus.DELIVERED]: {
     label: "已签收",
     description: "已收到签收事件，本次转运已完成。",
-    nextAction: "无需操作；可查看完整记录。"
+    nextAction: "本次转运已完成。"
   },
   [ShipmentStatus.EXCEPTION]: {
     label: "需处理",
@@ -92,6 +99,7 @@ export type ShipmentDto = {
   address?: AddressDto | null;
   quote?: QuoteDto | null;
   latestPayment?: PaymentDto | null;
+  trackingEvents?: TrackingEventDto[];
   unselectedReadyPackageCount?: number;
 };
 
@@ -115,6 +123,12 @@ type PaymentDto = {
   statusLabel: string;
   statusDescription: string;
   completedAt: string | null;
+};
+
+type TrackingEventDto = {
+  title: string;
+  description: string;
+  occurredAt: string;
 };
 
 type AddressDto = {
@@ -163,10 +177,19 @@ export function presentShipmentDetail(entity: ShipmentDetails): ShipmentDto {
     latestPayment: entity.latestPayment
       ? presentLatestPayment(entity.latestPayment)
       : null,
+    trackingEvents: entity.trackingEvents.map(presentTrackingEvent),
     unselectedReadyPackageCount:
       entity.status === ShipmentStatus.DRAFT
         ? Math.max(entity.readyPackageCount - entity.packages.length, 0)
         : undefined
+  };
+}
+
+function presentTrackingEvent(entity: TrackingEvent): TrackingEventDto {
+  return {
+    title: entity.displayMessage,
+    description: getTrackingEventDescription(entity.eventType),
+    occurredAt: entity.occurredAt
   };
 }
 

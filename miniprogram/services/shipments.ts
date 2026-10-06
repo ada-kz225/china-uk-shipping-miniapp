@@ -25,6 +25,7 @@ export type ShipmentDto = {
   address?: UKAddressInput | null;
   quote?: QuoteDto | null;
   latestPayment?: PaymentDto | null;
+  trackingEvents?: TrackingEventDto[];
   unselectedReadyPackageCount?: number;
 };
 
@@ -48,6 +49,12 @@ export type PaymentDto = {
   statusLabel: string;
   statusDescription: string;
   completedAt: string | null;
+};
+
+export type TrackingEventDto = {
+  title: string;
+  description: string;
+  occurredAt: string;
 };
 
 type ShipmentResponse = {

@@ -10,6 +10,7 @@ import { PackageRepository } from "./repositories/package-repository.js";
 import { PaymentRepository } from "./repositories/payment-repository.js";
 import { QuoteRepository } from "./repositories/quote-repository.js";
 import { ShipmentRepository } from "./repositories/shipment-repository.js";
+import { TrackingRepository } from "./repositories/tracking-repository.js";
 import { registerHealthRoute } from "./routes/health.js";
 import { registerMockPackageRoutes } from "./routes/mock-packages.js";
 import { registerMockShipmentRoutes } from "./routes/mock-shipments.js";
@@ -18,7 +19,9 @@ import { registerShipmentRoutes } from "./routes/shipments.js";
 import { PackageService } from "./services/package-service.js";
 import { PaymentService } from "./services/payment-service.js";
 import { QuoteService } from "./services/quote-service.js";
+import { DispatchService } from "./services/dispatch-service.js";
 import { ShipmentService } from "./services/shipment-service.js";
+import { TrackingService } from "./services/tracking-service.js";
 import { AppError } from "./utils/app-error.js";
 
 export type BuildAppOptions = {
@@ -63,6 +66,7 @@ export async function buildApp(
   const shipmentRepository = new ShipmentRepository(database);
   const quoteRepository = new QuoteRepository(database);
   const paymentRepository = new PaymentRepository(database);
+  const trackingRepository = new TrackingRepository(database);
   const addressRepository = new AddressRepository(database);
   const exceptionRepository = new ExceptionRepository(database);
   const auditLogRepository = new AuditLogRepository(database);
@@ -80,7 +84,8 @@ export async function buildApp(
     addressRepository,
     quoteRepository,
     paymentRepository,
-    auditLogRepository
+    auditLogRepository,
+    trackingRepository
   );
   const quoteService = new QuoteService(
     database,
@@ -95,6 +100,22 @@ export async function buildApp(
     quoteRepository,
     paymentRepository,
     exceptionRepository,
+    auditLogRepository
+  );
+  const dispatchService = new DispatchService(
+    database,
+    shipmentRepository,
+    quoteRepository,
+    paymentRepository,
+    exceptionRepository,
+    trackingRepository,
+    auditLogRepository
+  );
+  const trackingService = new TrackingService(
+    database,
+    shipmentRepository,
+    exceptionRepository,
+    trackingRepository,
     auditLogRepository
   );
 
@@ -145,6 +166,8 @@ export async function buildApp(
       shipmentService,
       quoteService,
       paymentService,
+      dispatchService,
+      trackingService,
       demoOpsKey: options.config.demoOpsKey
     });
   }

@@ -19,7 +19,11 @@ export class AppError extends Error {
       | "INVALID_WEIGHT"
       | "INVALID_AMOUNT"
       | "PAYMENT_ALREADY_COMPLETED"
-      | "PAYMENT_FAILED",
+      | "PAYMENT_FAILED"
+      | "PAYMENT_REQUIRED"
+      | "DISPATCH_NOT_ALLOWED"
+      | "TRACKING_TRANSITION_NOT_ALLOWED"
+      | "SHIPMENT_ALREADY_DELIVERED",
     public readonly statusCode: number,
     message: string,
     public readonly fieldErrors: FieldError[] = []

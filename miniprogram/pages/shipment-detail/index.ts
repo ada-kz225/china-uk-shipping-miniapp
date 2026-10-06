@@ -11,6 +11,11 @@ type ShipmentDetail = ShipmentDto & {
   createdAtDisplay: string;
   submittedAtDisplay: string;
   quoteGeneratedAtDisplay: string;
+  trackingEventsDisplay: Array<{
+    title: string;
+    description: string;
+    occurredAtDisplay: string;
+  }>;
 };
 
 Page({
@@ -116,7 +121,12 @@ function toShipmentDetail(item: ShipmentDto): ShipmentDetail {
     submittedAtDisplay: formatShipmentDate(item.submittedAt),
     quoteGeneratedAtDisplay: item.quote
       ? formatShipmentDate(item.quote.generatedAt)
-      : ""
+      : "",
+    trackingEventsDisplay: (item.trackingEvents ?? []).map((event) => ({
+      title: event.title,
+      description: event.description,
+      occurredAtDisplay: formatShipmentDate(event.occurredAt)
+    }))
   };
 }
 

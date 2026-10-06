@@ -6,7 +6,8 @@ import type {
   Payment,
   Quote,
   Shipment,
-  ShipmentStatus
+  ShipmentStatus,
+  TrackingEvent
 } from "../domain/index.js";
 import {
   PackageStatus,
@@ -27,6 +28,7 @@ import {
   type ShipmentListItem,
   type ShipmentWithPackages
 } from "../repositories/shipment-repository.js";
+import { TrackingRepository } from "../repositories/tracking-repository.js";
 import { AppError, type FieldError } from "../utils/app-error.js";
 
 export type UKAddressInput = {
@@ -43,6 +45,7 @@ export type ShipmentDetails = ShipmentWithPackages & {
   readyPackageCount: number;
   quote: Quote | undefined;
   latestPayment: Payment | undefined;
+  trackingEvents: TrackingEvent[];
 };
 
 const historyStatuses = [
@@ -59,7 +62,8 @@ export class ShipmentService {
     private readonly addressRepository: AddressRepository,
     private readonly quoteRepository: QuoteRepository,
     private readonly paymentRepository: PaymentRepository,
-    private readonly auditLogRepository: AuditLogRepository
+    private readonly auditLogRepository: AuditLogRepository,
+    private readonly trackingRepository = new TrackingRepository(database)
   ) {}
 
   createDraft(userId: string, packageIds: string[]): ShipmentDetails {
@@ -97,7 +101,8 @@ export class ShipmentService {
         : undefined,
       readyPackageCount: this.shipmentRepository.countReadyPackagesForUser(userId),
       quote: this.quoteRepository.findByShipmentId(entity.id),
-      latestPayment: this.paymentRepository.findLatestByShipmentId(entity.id)
+      latestPayment: this.paymentRepository.findLatestByShipmentId(entity.id),
+      trackingEvents: this.trackingRepository.listByShipmentId(entity.id)
     };
   }
 

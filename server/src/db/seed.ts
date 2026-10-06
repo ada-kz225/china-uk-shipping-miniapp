@@ -12,6 +12,7 @@ type SeedShipment = {
   packageId: string;
   finalWeightG: number | null;
   dispatchedAt: string | null;
+  deliveredAt: string | null;
 };
 
 type SeedPackage = {
@@ -31,7 +32,8 @@ const seedShipments: SeedShipment[] = [
     status: "WAREHOUSE_PROCESSING",
     packageId: "pkg_demo_13",
     finalWeightG: null,
-    dispatchedAt: null
+    dispatchedAt: null,
+    deliveredAt: null
   },
   {
     id: "sh_demo_awaiting_payment",
@@ -40,7 +42,8 @@ const seedShipments: SeedShipment[] = [
     status: "AWAITING_PAYMENT",
     packageId: "pkg_demo_14",
     finalWeightG: 3200,
-    dispatchedAt: null
+    dispatchedAt: null,
+    deliveredAt: null
   },
   {
     id: "sh_demo_paid",
@@ -49,7 +52,8 @@ const seedShipments: SeedShipment[] = [
     status: "PAID_AWAITING_DISPATCH",
     packageId: "pkg_demo_15",
     finalWeightG: 2800,
-    dispatchedAt: null
+    dispatchedAt: null,
+    deliveredAt: null
   },
   {
     id: "sh_demo_transit",
@@ -58,7 +62,8 @@ const seedShipments: SeedShipment[] = [
     status: "INTERNATIONAL_TRANSIT",
     packageId: "pkg_demo_16",
     finalWeightG: 4100,
-    dispatchedAt: "2026-10-01T10:00:00.000Z"
+    dispatchedAt: "2026-10-01T10:00:00.000Z",
+    deliveredAt: null
   },
   {
     id: "sh_demo_delivered",
@@ -67,7 +72,8 @@ const seedShipments: SeedShipment[] = [
     status: "DELIVERED",
     packageId: "pkg_demo_17",
     finalWeightG: 2500,
-    dispatchedAt: "2026-09-20T10:00:00.000Z"
+    dispatchedAt: "2026-09-20T10:00:00.000Z",
+    deliveredAt: "2026-09-24T10:00:00.000Z"
   },
   {
     id: "sh_demo_exception",
@@ -76,7 +82,8 @@ const seedShipments: SeedShipment[] = [
     status: "EXCEPTION",
     packageId: "pkg_demo_18",
     finalWeightG: 3600,
-    dispatchedAt: "2026-10-02T10:00:00.000Z"
+    dispatchedAt: "2026-10-02T10:00:00.000Z",
+    deliveredAt: null
   }
 ];
 
@@ -244,8 +251,8 @@ function insertShipments(database: SqliteDatabase): void {
       [
         "INSERT OR IGNORE INTO shipments (",
         "id, reference, user_id, warehouse_id, address_id, status, submitted_at,",
-        "packing_completed_at, final_weight_g, final_chargeable_weight_g, dispatched_at, created_at, updated_at",
-        ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "packing_completed_at, final_weight_g, final_chargeable_weight_g, dispatched_at, delivered_at, created_at, updated_at",
+        ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     ].join(" ")
   );
 
@@ -262,6 +269,7 @@ function insertShipments(database: SqliteDatabase): void {
       shipment.finalWeightG,
       shipment.finalWeightG,
       shipment.dispatchedAt,
+      shipment.deliveredAt,
       seedTime,
       seedTime
     );
@@ -411,16 +419,16 @@ function insertTrackingEvents(database: SqliteDatabase): void {
     {
       shipmentId: "sh_demo_transit",
       events: [
-        ["DISPATCHED", "已从仓库发出", "2026-10-01T10:00:00.000Z"],
+        ["DISPATCHED", "已从中国仓库发出", "2026-10-01T10:00:00.000Z"],
         ["INTERNATIONAL_TRANSIT", "国际运输中", "2026-10-02T10:00:00.000Z"]
       ]
     },
     {
       shipmentId: "sh_demo_delivered",
       events: [
-        ["DISPATCHED", "已从仓库发出", "2026-09-20T10:00:00.000Z"],
+        ["DISPATCHED", "已从中国仓库发出", "2026-09-20T10:00:00.000Z"],
         ["INTERNATIONAL_TRANSIT", "国际运输中", "2026-09-21T10:00:00.000Z"],
-        ["CUSTOMS_CLEARANCE", "清关中", "2026-09-22T10:00:00.000Z"],
+        ["CUSTOMS_CLEARANCE", "清关处理中", "2026-09-22T10:00:00.000Z"],
         ["UK_LAST_MILE", "英国派送中", "2026-09-23T10:00:00.000Z"],
         ["DELIVERED", "已签收", "2026-09-24T10:00:00.000Z"]
       ]
@@ -428,9 +436,9 @@ function insertTrackingEvents(database: SqliteDatabase): void {
     {
       shipmentId: "sh_demo_exception",
       events: [
-        ["DISPATCHED", "已从仓库发出", "2026-10-02T10:00:00.000Z"],
+        ["DISPATCHED", "已从中国仓库发出", "2026-10-02T10:00:00.000Z"],
         ["INTERNATIONAL_TRANSIT", "国际运输中", "2026-10-03T10:00:00.000Z"],
-        ["CUSTOMS_CLEARANCE", "清关中", "2026-10-04T10:00:00.000Z"],
+        ["CUSTOMS_CLEARANCE", "清关处理中", "2026-10-04T10:00:00.000Z"],
         ["UK_LAST_MILE", "英国派送中", "2026-10-05T10:00:00.000Z"]
       ]
     }

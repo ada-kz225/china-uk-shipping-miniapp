@@ -58,7 +58,7 @@ describe("Phase 1 SQLite schema", () => {
     const migrationCount = database
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(migrationCount.count).toBe(3);
+    expect(migrationCount.count).toBe(4);
   });
 
   it("enforces package foreign keys and globally unique domestic tracking numbers", () => {

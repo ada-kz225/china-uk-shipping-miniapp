@@ -18,6 +18,7 @@ export type CreateShipmentInput = {
   finalWeightG?: number | null;
   finalChargeableWeightG?: number | null;
   dispatchedAt?: string | null;
+  deliveredAt?: string | null;
 };
 
 export type UpdateShipmentInput = Partial<
@@ -31,6 +32,7 @@ export type UpdateShipmentInput = Partial<
     | "finalWeightG"
     | "finalChargeableWeightG"
     | "dispatchedAt"
+    | "deliveredAt"
   >
 >;
 
@@ -54,6 +56,7 @@ const shipmentFields = [
   "final_weight_g AS finalWeightG",
   "final_chargeable_weight_g AS finalChargeableWeightG",
   "dispatched_at AS dispatchedAt",
+  "delivered_at AS deliveredAt",
   "version",
   "created_at AS createdAt",
   "updated_at AS updatedAt"
@@ -85,8 +88,8 @@ export class ShipmentRepository {
         [
           "INSERT INTO shipments (",
           "id, reference, user_id, warehouse_id, address_id, status, submitted_at,",
-          "packing_completed_at, final_weight_g, final_chargeable_weight_g, dispatched_at, created_at, updated_at",
-          ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+          "packing_completed_at, final_weight_g, final_chargeable_weight_g, dispatched_at, delivered_at, created_at, updated_at",
+          ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         ].join(" ")
       )
       .run(
@@ -101,6 +104,7 @@ export class ShipmentRepository {
         input.finalWeightG ?? null,
         input.finalChargeableWeightG ?? null,
         input.dispatchedAt ?? null,
+        input.deliveredAt ?? null,
         timestamp,
         timestamp
       );
@@ -167,7 +171,8 @@ export class ShipmentRepository {
       packingCompletedAt: "packing_completed_at",
       finalWeightG: "final_weight_g",
       finalChargeableWeightG: "final_chargeable_weight_g",
-      dispatchedAt: "dispatched_at"
+      dispatchedAt: "dispatched_at",
+      deliveredAt: "delivered_at"
     };
     const assignments = entries.map(
       ([field]) => columnByField[field] + " = ?"

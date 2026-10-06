@@ -33,6 +33,7 @@ export type Shipment = {
   finalWeightG: number | null;
   finalChargeableWeightG: number | null;
   dispatchedAt: string | null;
+  deliveredAt: string | null;
   version: number;
   createdAt: string;
   updatedAt: string;

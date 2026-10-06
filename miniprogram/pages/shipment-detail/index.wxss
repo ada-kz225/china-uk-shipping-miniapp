@@ -89,6 +89,76 @@
   font-size: 24rpx;
 }
 
+.timeline-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 18rpx;
+  padding-top: 24rpx;
+}
+
+.timeline-marker {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  width: 20rpx;
+}
+
+.timeline-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #333333;
+}
+
+.timeline-line {
+  width: 2rpx;
+  min-height: 70rpx;
+  flex: 1;
+  margin: 8rpx 0 -24rpx;
+  background: #d9d9d9;
+}
+
+.timeline-content {
+  min-width: 0;
+  flex: 1;
+  padding-bottom: 6rpx;
+}
+
+.timeline-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.timeline-title {
+  color: #222222;
+  font-size: 29rpx;
+  font-weight: 600;
+}
+
+.timeline-time {
+  flex: none;
+  color: #777777;
+  font-size: 23rpx;
+  text-align: right;
+}
+
+.timeline-description {
+  display: block;
+  margin-top: 8rpx;
+  color: #666666;
+  font-size: 26rpx;
+  line-height: 1.5;
+}
+
 .quote-row {
   display: flex;
   justify-content: space-between;
