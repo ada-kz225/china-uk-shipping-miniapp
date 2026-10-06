@@ -1,1 +1,154 @@
 @import "../../app.wxss";
+
+.home-page {
+  min-height: 100vh;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.page-title,
+.section-title,
+.card-title,
+.shipment-reference,
+.shipment-status,
+.warehouse-line,
+.card-description,
+.overview-row,
+.empty-card {
+  display: block;
+}
+
+.page-title {
+  color: #1f1f1f;
+  font-size: 44rpx;
+  font-weight: 600;
+}
+
+.page-description {
+  display: block;
+  margin-top: 12rpx;
+  color: #666666;
+  font-size: 26rpx;
+}
+
+.section {
+  margin-top: 44rpx;
+}
+
+.section-title {
+  margin-bottom: 18rpx;
+  color: #1f1f1f;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.action-card,
+.journey-card,
+.overview-card,
+.warehouse-card,
+.empty-card {
+  border-radius: 16rpx;
+  background: #ffffff;
+}
+
+.action-card,
+.journey-card,
+.warehouse-card,
+.empty-card {
+  padding: 24rpx;
+}
+
+.action-card,
+.overview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.action-card + .action-card {
+  margin-top: 16rpx;
+}
+
+.card-title,
+.shipment-reference {
+  color: #262626;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.card-description {
+  margin-top: 10rpx;
+  color: #666666;
+  font-size: 26rpx;
+  line-height: 1.55;
+}
+
+.card-arrow {
+  flex: none;
+  color: #777777;
+  font-size: 38rpx;
+}
+
+.shipment-status {
+  margin-top: 14rpx;
+  color: #1f1f1f;
+  font-size: 28rpx;
+}
+
+.overview-row {
+  padding: 24rpx;
+  border-bottom: 1rpx solid #eeeeee;
+  color: #333333;
+  font-size: 29rpx;
+}
+
+.overview-row:last-child {
+  border-bottom: 0;
+}
+
+.overview-value {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  color: #444444;
+}
+
+.warehouse-line {
+  margin-top: 14rpx;
+  color: #555555;
+  font-size: 26rpx;
+  line-height: 1.55;
+}
+
+.copy-button,
+.secondary-button {
+  margin: 24rpx 0 0;
+  padding: 0 24rpx;
+  border: 1rpx solid #d7d7d7;
+  background: #ffffff;
+  color: #333333;
+  font-size: 28rpx;
+  line-height: 64rpx;
+}
+
+.feedback-state {
+  margin-top: 120rpx;
+  color: #666666;
+  font-size: 28rpx;
+  text-align: center;
+}
+
+.feedback-message {
+  display: block;
+}
+
+.feedback-state .secondary-button {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.empty-card {
+  color: #666666;
+  font-size: 27rpx;
+}

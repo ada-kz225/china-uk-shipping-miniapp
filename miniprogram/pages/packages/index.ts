@@ -52,6 +52,15 @@ Page({
       app.globalData.resetPackageSelection = false;
     }
 
+    if (app.globalData.pendingPackageFilter) {
+      this.setData({
+        selectedFilter: app.globalData.pendingPackageFilter,
+        isSelectionMode: false,
+        selectedPackageIds: []
+      });
+      app.globalData.pendingPackageFilter = null;
+    }
+
     this.loadPackages();
   },
 

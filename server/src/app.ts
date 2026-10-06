@@ -11,7 +11,9 @@ import { PaymentRepository } from "./repositories/payment-repository.js";
 import { QuoteRepository } from "./repositories/quote-repository.js";
 import { ShipmentRepository } from "./repositories/shipment-repository.js";
 import { TrackingRepository } from "./repositories/tracking-repository.js";
+import { WarehouseRepository } from "./repositories/warehouse-repository.js";
 import { registerHealthRoute } from "./routes/health.js";
+import { registerHomeRoute } from "./routes/home.js";
 import { registerMockPackageRoutes } from "./routes/mock-packages.js";
 import { registerMockShipmentRoutes } from "./routes/mock-shipments.js";
 import { registerPackageRoutes } from "./routes/packages.js";
@@ -23,6 +25,7 @@ import { DispatchService } from "./services/dispatch-service.js";
 import { ExceptionService } from "./services/exception-service.js";
 import { ShipmentService } from "./services/shipment-service.js";
 import { TrackingService } from "./services/tracking-service.js";
+import { HomeService } from "./services/home-service.js";
 import { AppError } from "./utils/app-error.js";
 
 export type BuildAppOptions = {
@@ -71,6 +74,7 @@ export async function buildApp(
   const addressRepository = new AddressRepository(database);
   const exceptionRepository = new ExceptionRepository(database);
   const auditLogRepository = new AuditLogRepository(database);
+  const warehouseRepository = new WarehouseRepository(database);
   const packageService = new PackageService(
     database,
     packageRepository,
@@ -126,6 +130,11 @@ export async function buildApp(
     shipmentRepository,
     auditLogRepository
   );
+  const homeService = new HomeService(
+    packageRepository,
+    shipmentRepository,
+    warehouseRepository
+  );
 
   app.addHook("onClose", async () => {
     database.close();
@@ -162,6 +171,7 @@ export async function buildApp(
   });
 
   await registerHealthRoute(app, { database });
+  await registerHomeRoute(app, { homeService });
   await registerPackageRoutes(app, { packageService });
   await registerShipmentRoutes(app, { shipmentService, paymentService });
 
