@@ -1,0 +1,305 @@
+@import "../../app.wxss";
+
+.detail-page {
+  min-height: 100vh;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.status-card,
+.information-card {
+  padding: 26rpx 24rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+}
+
+.field-label {
+  display: block;
+  color: #777777;
+  font-size: 25rpx;
+}
+
+.reference {
+  display: block;
+  margin-top: 10rpx;
+  color: #1f1f1f;
+  font-size: 35rpx;
+  font-weight: 600;
+}
+
+.status-label {
+  display: block;
+  margin-top: 20rpx;
+  color: #1f1f1f;
+  font-size: 31rpx;
+  font-weight: 600;
+}
+
+.status-description {
+  display: block;
+  margin-top: 12rpx;
+  color: #555555;
+  font-size: 28rpx;
+  line-height: 1.55;
+}
+
+.next-action {
+  margin-top: 22rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #e8e8e8;
+  color: #333333;
+  font-size: 28rpx;
+  line-height: 1.55;
+}
+
+.next-action .field-label {
+  margin-bottom: 8rpx;
+}
+
+.draft-button {
+  margin: 24rpx 0 0;
+  background: #1f1f1f;
+  color: #ffffff;
+  font-size: 29rpx;
+}
+
+.section-title {
+  display: block;
+  color: #1f1f1f;
+  font-size: 31rpx;
+  font-weight: 600;
+}
+
+.quote-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.mock-note {
+  flex: none;
+  color: #777777;
+  font-size: 24rpx;
+}
+
+.timeline-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 18rpx;
+  padding-top: 24rpx;
+}
+
+.timeline-marker {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  width: 20rpx;
+}
+
+.timeline-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #333333;
+}
+
+.timeline-line {
+  width: 2rpx;
+  min-height: 70rpx;
+  flex: 1;
+  margin: 8rpx 0 -24rpx;
+  background: #d9d9d9;
+}
+
+.timeline-content {
+  min-width: 0;
+  flex: 1;
+  padding-bottom: 6rpx;
+}
+
+.timeline-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.timeline-title {
+  color: #222222;
+  font-size: 29rpx;
+  font-weight: 600;
+}
+
+.timeline-time {
+  flex: none;
+  color: #777777;
+  font-size: 23rpx;
+  text-align: right;
+}
+
+.timeline-description {
+  display: block;
+  margin-top: 8rpx;
+  color: #666666;
+  font-size: 26rpx;
+  line-height: 1.5;
+}
+
+.quote-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 24rpx;
+  margin-top: 20rpx;
+  color: #444444;
+  font-size: 28rpx;
+}
+
+.quote-total {
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #e8e8e8;
+  color: #1f1f1f;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.quote-time {
+  display: block;
+  margin-top: 18rpx;
+  color: #777777;
+  font-size: 24rpx;
+}
+
+.payment-button {
+  margin: 24rpx 0 0;
+  background: #1f1f1f;
+  color: #ffffff;
+  font-size: 30rpx;
+}
+
+.payment-note {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-top: 22rpx;
+  padding: 18rpx;
+  border-radius: 12rpx;
+  background: #f3f3f3;
+  color: #444444;
+  font-size: 27rpx;
+  line-height: 1.5;
+}
+
+.payment-note-failed {
+  background: #f8eeee;
+  color: #8a352c;
+}
+
+.payment-note-success {
+  background: #eef5ef;
+  color: #2e6134;
+}
+
+.exception-card {
+  border: 1rpx solid #e7c8c3;
+}
+
+.exception-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-top: 20rpx;
+  color: #4d3733;
+  font-size: 28rpx;
+  line-height: 1.55;
+}
+
+.package-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #e8e8e8;
+}
+
+.package-row:last-child {
+  border-bottom: 0;
+}
+
+.tracking-number,
+.package-description,
+.address-content text {
+  display: block;
+}
+
+.tracking-number {
+  color: #333333;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.package-description {
+  margin-top: 8rpx;
+  color: #666666;
+  font-size: 26rpx;
+}
+
+.package-status {
+  flex: none;
+  color: #555555;
+  font-size: 25rpx;
+}
+
+.address-content,
+.empty-address {
+  display: block;
+  margin-top: 18rpx;
+  color: #444444;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.empty-address {
+  color: #777777;
+}
+
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-top: 20rpx;
+  color: #444444;
+  font-size: 27rpx;
+  text-align: right;
+}
+
+.feedback-state {
+  margin-top: 100rpx;
+  color: #666666;
+  font-size: 28rpx;
+  text-align: center;
+}
+
+.secondary-button {
+  margin: 24rpx auto 0;
+  padding: 0 24rpx;
+  background: #ffffff;
+  color: #333333;
+  font-size: 28rpx;
+  line-height: 64rpx;
+}

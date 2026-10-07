@@ -2,12 +2,13 @@
   <view class="page-heading">
     <view>
       <text class="page-title">我的包裹</text>
-      <text class="page-description">查看包裹到仓、确认和转运状态</text>
+      <text class="page-description">{{isSelectionMode ? '选择本次要转运的包裹' : '查看包裹到仓、确认和转运状态'}}</text>
     </view>
-    <button class="declare-button" bindtap="onDeclareTap">预报包裹</button>
+    <button wx:if="{{isSelectionMode}}" class="secondary-button heading-button" bindtap="onExitSelection">退出</button>
+    <button wx:else class="declare-button" bindtap="onDeclareTap">预报包裹</button>
   </view>
 
-  <scroll-view class="filter-bar" scroll-x="true" enable-flex="true">
+  <scroll-view wx:if="{{!isSelectionMode}}" class="filter-bar" scroll-x="true" enable-flex="true">
     <view class="filter-items">
       <view
         wx:for="{{filters}}"
@@ -39,12 +40,17 @@
     <view
       wx:for="{{packages}}"
       wx:key="id"
-      class="package-card"
+      class="package-card {{isSelectionMode && !item.isEligibleForShipment ? 'package-card-disabled' : ''}}"
       data-id="{{item.id}}"
-      bindtap="onPackageTap"
+      bindtap="onCardTap"
     >
       <view class="card-header">
-        <text class="tracking-number">{{item.domesticTrackingNumber}}</text>
+        <view class="card-title">
+          <view wx:if="{{isSelectionMode}}" class="selection-mark {{item.isSelected ? 'selection-mark-active' : ''}} {{!item.isEligibleForShipment ? 'selection-mark-disabled' : ''}}">
+            {{item.isSelected ? '✓' : ''}}
+          </view>
+          <text class="tracking-number">{{item.domesticTrackingNumber}}</text>
+        </view>
         <text class="status-label">{{item.statusLabel}}</text>
       </view>
       <text class="package-description">{{item.description}}</text>
@@ -55,9 +61,31 @@
       <view wx:if="{{item.shipmentReference}}" class="relation-note">
         已关联转运单：{{item.shipmentReference}}
       </view>
-      <view wx:if="{{item.exception}}" class="exception-note">
-        {{item.exception.title}}
+      <view wx:if="{{item.activeException}}" class="exception-note">
+        {{item.activeException.title}}
+      </view>
+      <view wx:if="{{isSelectionMode && !item.isEligibleForShipment}}" class="unavailable-note">
+        不可选：{{item.selectionReason}}
       </view>
     </view>
+  </view>
+
+  <view wx:if="{{!isSelectionMode && packages.length > 0 && !isLoading && !errorMessage}}" class="consolidation-entry">
+    <button class="primary-button" bindtap="onStartConsolidation">开始合箱</button>
+  </view>
+
+  <view wx:if="{{isSelectionMode}}" class="selection-bottom-bar">
+    <view>
+      <text class="selection-count">已选择 {{selectedPackageIds.length}} 件</text>
+      <text class="selection-hint">还有 {{readyPackageCount - selectedPackageIds.length}} 件可合箱包裹未选择</text>
+    </view>
+    <button
+      class="selection-create-button"
+      loading="{{isCreatingShipment}}"
+      disabled="{{isCreatingShipment}}"
+      bindtap="onCreateShipmentTap"
+    >
+      创建转运单
+    </button>
   </view>
 </view>

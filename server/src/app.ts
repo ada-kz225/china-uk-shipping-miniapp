@@ -4,12 +4,28 @@ import type { AppConfig } from "./config/env.js";
 import { createDatabase } from "./db/database.js";
 import { runMigrations } from "./db/migrate.js";
 import { AuditLogRepository } from "./repositories/audit-log-repository.js";
+import { AddressRepository } from "./repositories/address-repository.js";
 import { ExceptionRepository } from "./repositories/exception-repository.js";
 import { PackageRepository } from "./repositories/package-repository.js";
+import { PaymentRepository } from "./repositories/payment-repository.js";
+import { QuoteRepository } from "./repositories/quote-repository.js";
+import { ShipmentRepository } from "./repositories/shipment-repository.js";
+import { TrackingRepository } from "./repositories/tracking-repository.js";
+import { WarehouseRepository } from "./repositories/warehouse-repository.js";
 import { registerHealthRoute } from "./routes/health.js";
+import { registerHomeRoute } from "./routes/home.js";
 import { registerMockPackageRoutes } from "./routes/mock-packages.js";
+import { registerMockShipmentRoutes } from "./routes/mock-shipments.js";
 import { registerPackageRoutes } from "./routes/packages.js";
+import { registerShipmentRoutes } from "./routes/shipments.js";
 import { PackageService } from "./services/package-service.js";
+import { PaymentService } from "./services/payment-service.js";
+import { QuoteService } from "./services/quote-service.js";
+import { DispatchService } from "./services/dispatch-service.js";
+import { ExceptionService } from "./services/exception-service.js";
+import { ShipmentService } from "./services/shipment-service.js";
+import { TrackingService } from "./services/tracking-service.js";
+import { HomeService } from "./services/home-service.js";
 import { AppError } from "./utils/app-error.js";
 
 export type BuildAppOptions = {
@@ -23,16 +39,101 @@ export async function buildApp(
   const app = Fastify({
     logger: options.logger ?? false
   });
+
+  // wx.request sends application/json by default, even for body-less DELETE and
+  // POST requests. Fastify's default JSON parser rejects that empty body before
+  // the request can reach its route. Treat an empty JSON body as undefined while
+  // preserving a structured 400 response for malformed non-empty JSON.
+  app.removeContentTypeParser("application/json");
+  app.addContentTypeParser(
+    "application/json",
+    { parseAs: "string" },
+    (_request, body, done) => {
+      const content = body.toString().trim();
+
+      if (!content) {
+        done(null, undefined);
+        return;
+      }
+
+      try {
+        done(null, JSON.parse(content));
+      } catch {
+        done(new AppError("INVALID_INPUT", 400, "请求正文不是有效 JSON。"));
+      }
+    }
+  );
+
   const database = createDatabase(options.config.sqliteDbPath);
   runMigrations(database);
   const packageRepository = new PackageRepository(database);
+  const shipmentRepository = new ShipmentRepository(database);
+  const quoteRepository = new QuoteRepository(database);
+  const paymentRepository = new PaymentRepository(database);
+  const trackingRepository = new TrackingRepository(database);
+  const addressRepository = new AddressRepository(database);
   const exceptionRepository = new ExceptionRepository(database);
   const auditLogRepository = new AuditLogRepository(database);
+  const warehouseRepository = new WarehouseRepository(database);
   const packageService = new PackageService(
     database,
     packageRepository,
     exceptionRepository,
     auditLogRepository
+  );
+  const shipmentService = new ShipmentService(
+    database,
+    shipmentRepository,
+    packageRepository,
+    exceptionRepository,
+    addressRepository,
+    quoteRepository,
+    paymentRepository,
+    auditLogRepository,
+    trackingRepository
+  );
+  const quoteService = new QuoteService(
+    database,
+    shipmentRepository,
+    quoteRepository,
+    exceptionRepository,
+    auditLogRepository
+  );
+  const paymentService = new PaymentService(
+    database,
+    shipmentRepository,
+    quoteRepository,
+    paymentRepository,
+    exceptionRepository,
+    auditLogRepository
+  );
+  const dispatchService = new DispatchService(
+    database,
+    shipmentRepository,
+    quoteRepository,
+    paymentRepository,
+    exceptionRepository,
+    trackingRepository,
+    auditLogRepository
+  );
+  const trackingService = new TrackingService(
+    database,
+    shipmentRepository,
+    exceptionRepository,
+    trackingRepository,
+    auditLogRepository
+  );
+  const exceptionService = new ExceptionService(
+    database,
+    exceptionRepository,
+    packageRepository,
+    shipmentRepository,
+    auditLogRepository
+  );
+  const homeService = new HomeService(
+    packageRepository,
+    shipmentRepository,
+    warehouseRepository
   );
 
   app.addHook("onClose", async () => {
@@ -52,7 +153,14 @@ export async function buildApp(
       });
     }
 
-    request.log.error(error);
+    request.log.error(
+      {
+        err: error,
+        method: request.method,
+        requestPath: request.url
+      },
+      "Unhandled API error"
+    );
 
     return reply.status(500).send({
       error: {
@@ -63,11 +171,23 @@ export async function buildApp(
   });
 
   await registerHealthRoute(app, { database });
+  await registerHomeRoute(app, { homeService });
   await registerPackageRoutes(app, { packageService });
+  await registerShipmentRoutes(app, { shipmentService, paymentService });
 
   if (options.config.environment !== "production") {
     await registerMockPackageRoutes(app, {
       packageService,
+      exceptionService,
+      demoOpsKey: options.config.demoOpsKey
+    });
+    await registerMockShipmentRoutes(app, {
+      shipmentService,
+      quoteService,
+      paymentService,
+      dispatchService,
+      trackingService,
+      exceptionService,
       demoOpsKey: options.config.demoOpsKey
     });
   }

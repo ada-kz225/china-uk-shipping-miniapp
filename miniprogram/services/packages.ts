@@ -19,14 +19,25 @@ export type PackageDto = {
   arrivedAt: string | null;
   weightG: number | null;
   shipmentReference: string | null;
+  isEligibleForShipment: boolean;
+  selectionReason: string | null;
   createdAt: string;
   updatedAt: string;
-  exception: {
+  activeException: {
     title: string;
     description: string;
     impact: string;
     requiredAction: string;
+    progress: string;
+    support: string;
   } | null;
+};
+
+export type PackageStatusCounts = Record<PackageFilter, number>;
+
+export type PackageListResult = {
+  packages: PackageDto[];
+  statusCounts: PackageStatusCounts;
 };
 
 type PackageResponse = {
@@ -35,12 +46,16 @@ type PackageResponse = {
 
 type PackageListResponse = {
   data: PackageDto[];
+  statusCounts: PackageStatusCounts;
 };
 
-export function listPackages(filter: PackageFilter): Promise<PackageDto[]> {
+export function listPackages(filter: PackageFilter): Promise<PackageListResult> {
   return apiClient
     .get<PackageListResponse>("/packages?filter=" + filter)
-    .then((response) => response.data);
+    .then((response) => ({
+      packages: response.data,
+      statusCounts: response.statusCounts
+    }));
 }
 
 export function getPackage(id: string): Promise<PackageDto> {

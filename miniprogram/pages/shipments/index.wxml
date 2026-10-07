@@ -1,4 +1,53 @@
-<view class="phase-zero-page">
-  <text class="phase-zero-title">我的转运</text>
-  <text class="phase-zero-description">功能正在开发中。</text>
+<view class="shipment-page">
+  <view class="page-heading">
+    <text class="page-title">我的转运</text>
+    <text class="page-description">查看本次转运当前状态和下一步</text>
+  </view>
+
+  <view class="scope-switch">
+    <view
+      class="scope-item {{selectedScope === 'active' ? 'scope-item-active' : ''}}"
+      data-scope="active"
+      bindtap="onScopeTap"
+    >
+      进行中
+    </view>
+    <view
+      class="scope-item {{selectedScope === 'history' ? 'scope-item-active' : ''}}"
+      data-scope="history"
+      bindtap="onScopeTap"
+    >
+      历史
+    </view>
+  </view>
+
+  <view wx:if="{{isLoading}}" class="feedback-state">正在加载。</view>
+  <view wx:elif="{{errorMessage}}" class="feedback-state">
+    <text>{{errorMessage}}</text>
+    <button class="secondary-button" bindtap="onRetryTap">重新加载</button>
+  </view>
+  <view wx:elif="{{shipments.length === 0}}" class="feedback-state">
+    <text wx:if="{{selectedScope === 'active'}}">暂无进行中的转运单。</text>
+    <text wx:else>暂无历史转运单。</text>
+  </view>
+
+  <view wx:else class="shipment-list">
+    <view
+      wx:for="{{shipments}}"
+      wx:key="id"
+      class="shipment-card"
+      data-id="{{item.id}}"
+      bindtap="onShipmentTap"
+    >
+      <view class="card-header">
+        <text class="reference">{{item.referenceDisplay}}</text>
+        <text class="status-label">{{item.statusLabel}}</text>
+      </view>
+      <text class="next-action">{{item.nextAction}}</text>
+      <view class="card-meta">
+        <text>包含 {{item.packageCount}} 件包裹</text>
+        <text>更新：{{item.updatedAtDisplay}}</text>
+      </view>
+    </view>
+  </view>
 </view>

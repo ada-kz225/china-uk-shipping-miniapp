@@ -30,9 +30,22 @@ export type Shipment = {
   status: ShipmentStatus;
   submittedAt: string | null;
   packingCompletedAt: string | null;
+  finalWeightG: number | null;
   finalChargeableWeightG: number | null;
   dispatchedAt: string | null;
+  deliveredAt: string | null;
   version: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Address = {
+  id: string;
+  userId: string;
+  recipientName: string;
+  phone: string;
+  postcode: string;
+  addressLine: string;
   createdAt: string;
   updatedAt: string;
 };

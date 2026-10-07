@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { presentPackage } from "../presenters/package-presenter.js";
 import { PackageService } from "../services/package-service.js";
+import { ExceptionService } from "../services/exception-service.js";
 import { AppError } from "../utils/app-error.js";
 import { verifyDemoOpsKey } from "./request-context.js";
 
@@ -14,6 +15,7 @@ const packageParamsSchema = z
 
 type MockPackageRouteOptions = {
   packageService: PackageService;
+  exceptionService: ExceptionService;
   demoOpsKey: string;
 };
 
@@ -51,6 +53,33 @@ export async function registerMockPackageRoutes(
     const entity = options.packageService.markPackageReady(params.id);
 
     return { data: presentPackage(entity) };
+  });
+
+  app.post("/internal/mock/packages/:id/raise-exception", async (request) => {
+    const params = parsePackageParams(request.params);
+    verifyDemoOpsKey(request, options.demoOpsKey);
+    const exception = options.exceptionService.raiseException({
+      entityType: "PACKAGE",
+      entityId: params.id,
+      type: "PACKAGE_MATCHING_UNCONFIRMED",
+      title: "包裹信息待确认",
+      description: "仓库暂时无法确认该包裹归属。",
+      impact: "当前不能加入转运单。",
+      requiredAction: "请核对国内快递单号或补充必要信息。"
+    });
+
+    return { data: { id: exception.id, status: exception.status } };
+  });
+
+  app.post("/internal/mock/packages/:id/resolve-exception", async (request) => {
+    const params = parsePackageParams(request.params);
+    verifyDemoOpsKey(request, options.demoOpsKey);
+    const exception = options.exceptionService.resolveOpenExceptionForEntity(
+      "PACKAGE",
+      params.id
+    );
+
+    return { data: { id: exception.id, status: exception.status } };
   });
 }
 

@@ -1,6 +1,6 @@
 # P01 访谈后的假设校准
 
-> 本文只基于一位独立真实受访者 P01 的近期中国 → 英国转运经历，以及其结构化访谈记录。它是 **exploratory interview** 的收敛，不代表市场样本、用户比例或普遍需求。`Supported` 表示“有 P01 的直接访谈证据支持”，不表示“已验证大众需求”。原始证据见 [P01.md](user-research/interviews/P01.md)，逐样本记录见 [06-hypothesis-validation-table.md](user-research/06-hypothesis-validation-table.md)。
+> 本文只基于一位独立真实受访者 P01 的近期中国 → 英国转运经历，以及其结构化访谈记录。它是 **exploratory interview** 的收敛，不代表市场样本、用户比例或普遍需求。`Supported` 表示“有 P01 的直接访谈证据支持”，不表示“已验证大众需求”。原始访谈记录为私有研究材料，不纳入公开仓库；逐样本记录见 [06-hypothesis-validation-table.md](user-research/06-hypothesis-validation-table.md)。
 
 ## 判定方式
 

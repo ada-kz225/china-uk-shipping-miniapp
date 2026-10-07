@@ -4,7 +4,9 @@
     "pages/packages/index",
     "pages/shipments/index",
     "pages/package-detail/index",
-    "pages/package-declare/index"
+    "pages/package-declare/index",
+    "pages/shipment-create/index",
+    "pages/shipment-detail/index"
   ],
   "window": {
     "navigationBarTitleText": "中英转运",

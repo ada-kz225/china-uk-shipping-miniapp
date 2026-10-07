@@ -1,5 +1,9 @@
 import type { DomainException, Package } from "../domain/index.js";
 import { PackageStatus } from "../domain/index.js";
+import {
+  presentActiveException,
+  type ActiveExceptionDto
+} from "./exception-presenter.js";
 
 type PackageCopy = {
   label: string;
@@ -51,14 +55,11 @@ export type PackageDto = {
   arrivedAt: string | null;
   weightG: number | null;
   shipmentReference: string | null;
+  isEligibleForShipment: boolean;
+  selectionReason: string | null;
   createdAt: string;
   updatedAt: string;
-  exception: {
-    title: string;
-    description: string;
-    impact: string;
-    requiredAction: string;
-  } | null;
+  activeException: ActiveExceptionDto | null;
 };
 
 export function presentPackage(
@@ -78,15 +79,32 @@ export function presentPackage(
     arrivedAt: entity.arrivedAt,
     weightG: entity.weightG,
     shipmentReference: entity.shipmentReference ?? null,
+    isEligibleForShipment: entity.status === PackageStatus.READY_FOR_SHIPMENT,
+    selectionReason: getSelectionReason(entity),
     createdAt: entity.createdAt,
     updatedAt: entity.updatedAt,
-    exception: exception
-      ? {
-          title: exception.title,
-          description: exception.description,
-          impact: exception.impact,
-          requiredAction: exception.requiredAction
-        }
-      : null
+    activeException: exception ? presentActiveException(exception) : null
   };
+}
+
+function getSelectionReason(entity: Package): string | null {
+  if (entity.status === PackageStatus.READY_FOR_SHIPMENT) {
+    return null;
+  }
+
+  if (entity.status === PackageStatus.ARRIVED_PENDING_MATCH) {
+    return "正在确认归属，暂不可选。";
+  }
+
+  if (entity.status === PackageStatus.IN_SHIPMENT) {
+    return entity.shipmentReference
+      ? "已加入转运单号 " + entity.shipmentReference + "，暂不可选。"
+      : "已加入其他转运单，暂不可选。";
+  }
+
+  if (entity.status === PackageStatus.EXCEPTION) {
+    return "包裹存在需要处理的问题，暂不可选。";
+  }
+
+  return "包裹尚未完成到仓确认，暂不可选。";
 }

@@ -88,6 +88,14 @@ describe("Package API", () => {
     });
     expect(listResponse?.statusCode).toBe(200);
     expect(listResponse?.json().data).toHaveLength(1);
+    expect(listResponse?.json().statusCounts).toEqual({
+      all: 1,
+      inbound: 1,
+      pending_match: 0,
+      ready: 0,
+      in_shipment: 0,
+      needs_action: 0
+    });
 
     const detailResponse = await app?.inject({
       method: "GET",

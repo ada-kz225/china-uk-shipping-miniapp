@@ -5,7 +5,7 @@ export type CreateAuditLogInput = {
   actorType: "USER" | "MOCK_OPS" | "SYSTEM";
   actorId?: string | null;
   action: string;
-  entityType: "PACKAGE";
+  entityType: "PACKAGE" | "SHIPMENT";
   entityId: string;
   metadata?: Record<string, unknown>;
 };
@@ -34,7 +34,7 @@ export class AuditLogRepository {
       );
   }
 
-  listByEntity(entityType: "PACKAGE", entityId: string): Array<{
+  listByEntity(entityType: "PACKAGE" | "SHIPMENT", entityId: string): Array<{
     action: string;
     actorType: string;
     createdAt: string;

@@ -8,6 +8,45 @@ export enum PackageEvent {
   PACKAGE_MARKED_READY = "PACKAGE_MARKED_READY"
 }
 
+export function validatePackageExceptionRaise(
+  currentStatus: PackageStatus
+): PackageStatus {
+  if (
+    ![
+      PackageStatus.DECLARED,
+      PackageStatus.INBOUND_TO_WAREHOUSE,
+      PackageStatus.ARRIVED_PENDING_MATCH,
+      PackageStatus.READY_FOR_SHIPMENT
+    ].includes(currentStatus)
+  ) {
+    throw new AppError(
+      "INVALID_EXCEPTION_RESOLUTION",
+      409,
+      "当前包裹状态不支持创建需要处理的问题。"
+    );
+  }
+
+  return PackageStatus.EXCEPTION;
+}
+
+export function validatePackageExceptionResolution(
+  currentStatus: PackageStatus,
+  resumeStatus: PackageStatus
+): PackageStatus {
+  if (
+    currentStatus !== PackageStatus.EXCEPTION ||
+    resumeStatus === PackageStatus.EXCEPTION
+  ) {
+    throw new AppError(
+      "INVALID_EXCEPTION_RESOLUTION",
+      409,
+      "当前包裹不能恢复到记录的业务状态。"
+    );
+  }
+
+  return resumeStatus;
+}
+
 const transitions: Record<
   PackageEvent,
   { from: PackageStatus[]; to: PackageStatus }

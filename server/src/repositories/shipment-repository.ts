@@ -15,8 +15,10 @@ export type CreateShipmentInput = {
   status: ShipmentStatus;
   submittedAt?: string | null;
   packingCompletedAt?: string | null;
+  finalWeightG?: number | null;
   finalChargeableWeightG?: number | null;
   dispatchedAt?: string | null;
+  deliveredAt?: string | null;
 };
 
 export type UpdateShipmentInput = Partial<
@@ -27,10 +29,20 @@ export type UpdateShipmentInput = Partial<
     | "status"
     | "submittedAt"
     | "packingCompletedAt"
+    | "finalWeightG"
     | "finalChargeableWeightG"
     | "dispatchedAt"
+    | "deliveredAt"
   >
 >;
+
+export type ShipmentWithPackages = Shipment & {
+  packages: Package[];
+};
+
+export type ShipmentListItem = Shipment & {
+  packageCount: number;
+};
 
 const shipmentFields = [
   "id",
@@ -41,8 +53,10 @@ const shipmentFields = [
   "status",
   "submitted_at AS submittedAt",
   "packing_completed_at AS packingCompletedAt",
+  "final_weight_g AS finalWeightG",
   "final_chargeable_weight_g AS finalChargeableWeightG",
   "dispatched_at AS dispatchedAt",
+  "delivered_at AS deliveredAt",
   "version",
   "created_at AS createdAt",
   "updated_at AS updatedAt"
@@ -74,8 +88,8 @@ export class ShipmentRepository {
         [
           "INSERT INTO shipments (",
           "id, reference, user_id, warehouse_id, address_id, status, submitted_at,",
-          "packing_completed_at, final_chargeable_weight_g, dispatched_at, created_at, updated_at",
-          ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+          "packing_completed_at, final_weight_g, final_chargeable_weight_g, dispatched_at, delivered_at, created_at, updated_at",
+          ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         ].join(" ")
       )
       .run(
@@ -87,8 +101,10 @@ export class ShipmentRepository {
         input.status,
         input.submittedAt ?? null,
         input.packingCompletedAt ?? null,
+        input.finalWeightG ?? null,
         input.finalChargeableWeightG ?? null,
         input.dispatchedAt ?? null,
+        input.deliveredAt ?? null,
         timestamp,
         timestamp
       );
@@ -112,6 +128,34 @@ export class ShipmentRepository {
       .all(userId) as Shipment[];
   }
 
+  listWithPackageCountByUserId(
+    userId: string,
+    statuses?: ShipmentStatus[]
+  ): ShipmentListItem[] {
+    const statusFilter =
+      statuses && statuses.length > 0
+        ? " AND shipments.status IN (" + statuses.map(() => "?").join(", ") + ")"
+        : "";
+
+    return this.database
+      .prepare(
+        [
+          "SELECT " + shipmentFields + ",",
+          "(",
+          "  SELECT COUNT(*) FROM shipment_packages sp",
+          "  WHERE sp.shipment_id = shipments.id AND sp.released_at IS NULL",
+          ") + (",
+          "  SELECT COUNT(*) FROM shipment_draft_packages dp",
+          "  WHERE dp.shipment_id = shipments.id",
+          ") AS packageCount",
+          "FROM shipments",
+          "WHERE shipments.user_id = ?" + statusFilter,
+          "ORDER BY shipments.updated_at DESC"
+        ].join(" ")
+      )
+      .all(userId, ...(statuses ?? [])) as ShipmentListItem[];
+  }
+
   update(id: string, input: UpdateShipmentInput): Shipment | undefined {
     const entries = Object.entries(input).filter(([, value]) => value !== undefined);
 
@@ -125,8 +169,10 @@ export class ShipmentRepository {
       status: "status",
       submittedAt: "submitted_at",
       packingCompletedAt: "packing_completed_at",
+      finalWeightG: "final_weight_g",
       finalChargeableWeightG: "final_chargeable_weight_g",
-      dispatchedAt: "dispatched_at"
+      dispatchedAt: "dispatched_at",
+      deliveredAt: "delivered_at"
     };
     const assignments = entries.map(
       ([field]) => columnByField[field] + " = ?"
@@ -171,6 +217,57 @@ export class ShipmentRepository {
       );
   }
 
+  hasActivePackageRelation(packageId: string): boolean {
+    const row = this.database
+      .prepare(
+        "SELECT 1 AS existsFlag FROM shipment_packages WHERE package_id = ? AND released_at IS NULL LIMIT 1"
+      )
+      .get(packageId) as { existsFlag: number } | undefined;
+
+    return Boolean(row);
+  }
+
+  addDraftPackage(shipmentId: string, packageId: string): boolean {
+    const result = this.database
+      .prepare(
+        [
+          "INSERT OR IGNORE INTO shipment_draft_packages (",
+          "shipment_id, package_id, created_at",
+          ") VALUES (?, ?, ?)"
+        ].join(" ")
+      )
+      .run(shipmentId, packageId, nowIso());
+
+    return result.changes > 0;
+  }
+
+  removeDraftPackage(shipmentId: string, packageId: string): boolean {
+    const result = this.database
+      .prepare(
+        "DELETE FROM shipment_draft_packages WHERE shipment_id = ? AND package_id = ?"
+      )
+      .run(shipmentId, packageId);
+
+    return result.changes > 0;
+  }
+
+  clearDraftPackages(shipmentId: string): string[] {
+    const packages = this.listDraftPackages(shipmentId);
+    this.database
+      .prepare("DELETE FROM shipment_draft_packages WHERE shipment_id = ?")
+      .run(shipmentId);
+
+    return packages.map((item) => item.id);
+  }
+
+  deleteDraft(id: string): boolean {
+    const result = this.database
+      .prepare("DELETE FROM shipments WHERE id = ? AND status = 'DRAFT'")
+      .run(id);
+
+    return result.changes > 0;
+  }
+
   listPackages(shipmentId: string): Package[] {
     return this.database
       .prepare(
@@ -185,9 +282,31 @@ export class ShipmentRepository {
       .all(shipmentId) as Package[];
   }
 
-  findWithPackages(
-    id: string
-  ): (Shipment & { packages: Package[] }) | undefined {
+  listDraftPackages(shipmentId: string): Package[] {
+    return this.database
+      .prepare(
+        [
+          "SELECT " + packageFields,
+          "FROM shipment_draft_packages dp",
+          "JOIN packages p ON p.id = dp.package_id",
+          "WHERE dp.shipment_id = ?",
+          "ORDER BY dp.created_at ASC"
+        ].join(" ")
+      )
+      .all(shipmentId) as Package[];
+  }
+
+  countReadyPackagesForUser(userId: string): number {
+    const row = this.database
+      .prepare(
+        "SELECT COUNT(*) AS count FROM packages WHERE user_id = ? AND status = 'READY_FOR_SHIPMENT'"
+      )
+      .get(userId) as { count: number };
+
+    return row.count;
+  }
+
+  findWithPackages(id: string): ShipmentWithPackages | undefined {
     const shipment = this.findById(id);
 
     if (!shipment) {
@@ -196,7 +315,10 @@ export class ShipmentRepository {
 
     return {
       ...shipment,
-      packages: this.listPackages(id)
+      packages:
+        shipment.status === "DRAFT"
+          ? this.listDraftPackages(id)
+          : this.listPackages(id)
     };
   }
 }
