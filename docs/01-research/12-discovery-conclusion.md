@@ -1,6 +1,6 @@
 # Discovery 阶段正式结论
 
-> 本结论基于前期问题研究与一位独立真实受访者 P01 的探索性访谈。P01 不是代表性样本；本文不将单个用户经历表述为大众需求或市场结论。P01 原始记录见 [P01.md](user-research/interviews/P01.md)，假设校准见 [hypothesis-validation.md](hypothesis-validation.md)。
+> 本结论基于前期问题研究与一位独立真实受访者 P01 的探索性访谈。P01 不是代表性样本；本文不将单个用户经历表述为大众需求或市场结论。原始访谈记录为私有研究材料，不纳入公开仓库；假设校准见 [hypothesis-validation.md](hypothesis-validation.md)。
 
 ## Evidence-backed
 

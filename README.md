@@ -2,7 +2,7 @@
 
 一个从 0 到 1 完成产品研究、设计、原型验证与工程实现的个人产品作品集 MVP。它面向在英国、需要把多个中国电商包裹集中寄往英国的个人用户，帮助用户自助管理包裹、创建转运单，并持续了解履约进度。
 
-> 当前状态：**V1 Portfolio MVP — 自动化质量门禁已通过，等待最终微信开发者工具人工回归。**
+> 当前状态：**V1 Completed**
 
 ## 为什么做
 
@@ -111,12 +111,32 @@ SQLite（Migration + Seed）
 
 ```text
 china-uk-shipping-miniapp/
-├── miniprogram/       # 微信原生小程序
-├── server/            # Fastify API、领域服务、SQLite、Mock Ops、测试
-├── docs/              # 从研究到技术设计与复盘的产品文档
-├── prototype/         # 已冻结的低保真可点击原型
-└── package.json       # Workspace 脚本
+├── miniprogram/                    # 微信原生 TypeScript 小程序
+│   ├── pages/                       # 7 个 P0 页面：首页、包裹、转运及详情/创建页
+│   ├── services/                    # API Client 与 Home / Package / Shipment 请求封装
+│   ├── config/env.ts                # development / test API 地址与 Demo 用户配置
+│   ├── typings/                     # 小程序 TypeScript 全局类型
+│   ├── app.json                     # 页面注册、中文 TabBar 与小程序窗口配置
+│   └── README.md                    # 小程序页面、数据流与本地联调说明
+├── server/                          # Fastify API 服务
+│   ├── src/domain/                  # 核心实体、状态码与 Package / Shipment 状态机
+│   ├── src/services/                # 业务规则：包裹、转运、报价、付款、物流、异常、首页
+│   ├── src/routes/                  # 用户 API、健康检查及仅开发环境可用的 Mock Ops API
+│   ├── src/repositories/            # SQLite 数据访问与实体关联查询
+│   ├── src/presenters/              # 内部状态到中文用户 DTO 的映射
+│   ├── src/db/                      # 连接、Migration、Seed 与本地数据库脚本
+│   ├── src/config/                  # Zod 环境变量校验
+│   ├── src/utils/                   # 结构化错误与标识工具
+│   └── tests/                       # Unit、API、E2E 与回归测试
+├── docs/                            # Research → Definition → Design → Testing 的产品工件
+│   ├── 01-research/ … 07-technical-design/
+│   └── 08-retrospective/            # 作品集复盘与可追溯性说明
+├── prototype/                       # 已冻结的独立低保真可点击原型
+├── package.json                     # Workspace 命令与发布版本
+└── package-lock.json                # 锁定依赖版本
 ```
+
+小程序端的页面职责、数据请求和联调边界见 [miniprogram/README.md](miniprogram/README.md)。
 
 ## 本地运行
 
