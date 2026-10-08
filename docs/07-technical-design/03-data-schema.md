@@ -1,6 +1,8 @@
 # 数据库 Schema 设计
 
-> 物理表采用 snake_case。金额使用最小货币单位整数，重量使用克整数；所有时间以 UTC 存储，由小程序按中文界面格式展示。`version` 用于关键写操作的乐观并发保护。
+> **Initial / Proposed Schema Design。** 本文保留开发前的字段与约束设计，用于解释建模取舍；它不是当前 V1 物理 Schema 的唯一事实来源。当前实现以 `server/src/db/migrations/001-initial-schema.ts` 至 `004-shipment-delivered-at.ts` 为准，采用 `better-sqlite3` 直接 SQL migration。
+
+当前实现与本初始设计的主要差异：Package 使用必填 `description`、`arrived_at`、`weight_g`，未实现 `order_proof_ref`、`note`、`status_updated_at`；Address 仅以 `user_id` 关联，Shipment 以 `address_id` 引用地址快照；Quote 使用 `final_weight_g`、`chargeable_weight_g` 和 `service_fee_minor`；Tracking 使用 `event_type` 与 `display_message`；Exception 使用 `title`、`description`、`impact`、`required_action`，不单独存储 `user_progress` / `user_support` 字段；Audit Log 以 `metadata` 存储附加信息。保留 `version` 字段，但当前 V1 的主要并发防线是 SQLite transaction 与部分唯一索引，而非本文件所述的完整乐观锁协议。
 
 ## 1. 通用约定
 

@@ -1,6 +1,6 @@
 # V1 技术架构
 
-> 本文把已冻结的 MVP 转化为可实现的技术边界。它不增加页面、用户能力或真实第三方接入。仓库、支付与物流事件的**来源**可以模拟，但 Package、Shipment、状态机、归属与锁定规则必须由服务端真实执行。
+> 本文记录 V1 的架构设计与实现边界。当前 V1 已完成；实现事实以 `server/` 与 `miniprogram/` 代码为准。仓库、支付与物流事件的**来源**可以模拟，但 Package、Shipment、状态机、归属与锁定规则由服务端真实执行。
 
 ## 1. 架构目标与约束
 
@@ -18,7 +18,7 @@
 | Client | 微信原生小程序 + TypeScript + 官方 `wx` API | 与交付形态一致；页面少，不需要为了 MVP 引入复杂跨端框架。 |
 | API Server | Node.js 22+ + TypeScript + Fastify | 单体服务即可承载 API、领域服务和 Demo Ops；Fastify 适合轻量、类型明确的 REST API。 |
 | 输入校验 | Zod | 在 API 边界集中校验请求，避免把不可信输入带入领域服务。 |
-| Persistence | SQLite + Drizzle ORM / SQL migration | 单人作品集可本地一键运行；关系、唯一约束、事务和索引均适合本 MVP。迁移脚本保留后续切换 PostgreSQL 的路径。 |
+| Persistence | SQLite + `better-sqlite3` 直接 SQL access + SQL migration | 当前实现以 Repository 封装 SQL 数据访问；关系、唯一约束、事务和索引均适合本 MVP。未使用 Drizzle ORM。 |
 | 测试 | Vitest + Fastify inject API tests | 不依赖真实网络即可验证规则、接口与端到端验收场景。 |
 | 本地配置 | `.env` + 可提交的 `.env.example` | 区分本地数据库路径、Demo 会话和 Ops 密钥，不把真实密钥写入仓库。 |
 
@@ -42,7 +42,7 @@
 - 把付款成功直接视为出库；
 - 通过本地 Mock 数据伪造生产状态。
 
-开发期使用 Demo Session 获取当前用户身份。未来可将会话交换层替换为微信登录，不改变 Package / Shipment API 的归属校验方式。
+当前开发 / Demo 环境通过请求头 `X-Demo-User-Id` 提供演示用户身份；未实现 Demo Session endpoint 或 token。未来可将该请求上下文替换为微信登录，不改变 Package / Shipment API 的归属校验方式。
 
 ## 4. Backend
 
@@ -59,7 +59,7 @@ HTTP Route
 
 | 模块 | 责任 |
 | --- | --- |
-| Session / Access | 解析 Demo Session；取得 current user；拦截越权实体访问。 |
+| Access | 解析 `X-Demo-User-Id`；取得 current user；拦截越权实体访问。 |
 | Package | 预报、查询、到仓/匹配状态的读取与规则校验。 |
 | Shipment | 草稿、合箱、地址快照、提交、取消、包裹锁定与释放。 |
 | Quote / Payment | 记录最终重量、生成不可静默改写的报价快照、模拟付款尝试。 |
@@ -76,7 +76,7 @@ V1 使用单个 SQLite 数据库文件和迁移脚本。数据库负责最低层
 - 主键、外键、唯一性与非空约束；
 - 国内运单号、转运单号的唯一性；
 - `shipment_package` 的有效归属唯一性；
-- Quote 与 Address 对 Shipment 的一对一约束；
+- Quote 对 Shipment 的一对一约束；Address 在提交时创建快照并由 Shipment 的 `address_id` 引用；
 - 事务中的原子锁定、状态变更与审计记录。
 
 Package 与 Shipment 的跨表规则仍由 Application Service 在同一事务内判断。SQLite 适合单进程 Portfolio MVP；未来多实例部署、并发量上升或需要备份/可观测性时再迁移到 PostgreSQL，不是 V1 前置条件。
@@ -85,7 +85,7 @@ Package 与 Shipment 的跨表规则仍由 Application Service 在同一事务�
 
 Mock 的边界是外部事实来源，而不是业务规则。推荐由两部分组成：
 
-1. **Seed / Demo Script**：建立 15 件 Package、不同阶段 Shipment 与异常场景，供页面演示和验收测试复现；
+1. **Seed / Demo Script**：建立 19 件 Package、6 个不同阶段 Shipment，以及 Quote、Payment、Tracking、Exception 和 Audit 数据，供页面演示与验收复现；
 2. **受保护的 Mock Ops Command API**：仅本地开发或 Demo 管理环境可调用。每个命令通过领域服务执行，并写入状态、Tracking Event、Exception 与 AuditLog。
 
 支持的命令包括收货、匹配、标记可合箱、开始处理、称重、生成报价、支付成功/失败、出库、运输阶段、签收、创建异常与解决异常。命令无权绕过状态机或直接更新表。
@@ -94,7 +94,7 @@ Mock 的边界是外部事实来源，而不是业务规则。推荐由两部分
 
 | 外部能力 | V1 | 后续替换点 |
 | --- | --- | --- |
-| 微信登录 | Demo Session | Session adapter。 |
+| 微信登录 | `X-Demo-User-Id` 演示请求上下文 | 认证 / session adapter。 |
 | 微信支付 | 模拟 Payment adapter | Payment provider adapter。 |
 | 中国仓作业 | Mock Ops command | Warehouse event adapter。 |
 | 国内物流 | Seed / Mock event | Domestic tracking adapter。 |

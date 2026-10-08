@@ -2,6 +2,8 @@
 
 > 状态机是服务端领域规则，不由小程序提交目标状态。每一次转换必须校验当前状态、所有权、前置事实和阻塞 Exception，并在同一事务中更新实体版本与写入 AuditLog。面向用户的中文表达见 [07-user-facing-copy-mapping.md](07-user-facing-copy-mapping.md)。
 
+> **Current V1 implementation note**：本文件的状态与非法跳转原则已被实现；但其中“草稿取消后持久化为 `CANCELLED`”及“`SUBMITTED` / `AWAITING_PAYMENT` 可由用户取消”的规则是 **Initial / Proposed Design**。当前用户取消仅允许 `DRAFT`，并删除草稿及其 draft relation；已提交转运单不提供用户取消 endpoint。用户付款 API 在同一请求中完成模拟成功，`PAYMENT_PROCESSING` 是服务层中间状态，不会作为该 API 的稳定用户可见结果。
+
 ## 1. 实现原则
 
 1. Route 只接收业务动作，例如“提交转运单”或“记录出库”，不能接收任意 `status`；

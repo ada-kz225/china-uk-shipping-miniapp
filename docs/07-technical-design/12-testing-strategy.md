@@ -2,6 +2,8 @@
 
 > 测试优先证明“状态和业务规则不能被绕过”，其次证明接口和小程序任务流正确。当前 Prototype 的 UT01 结果仅支持交互设计进入技术阶段，不能替代实现后的功能测试。
 
+> **Current V1 implementation note**：本文件原本是开发前测试策略。V1 已完成，实际测试位于 `server/tests/`，覆盖数据库 Schema、Package、Shipment、Quote / Payment、Dispatch / Tracking、Exception、Home 与端到端路径；项目 README 记录当前运行命令。文中 Demo Session、scenario seed、提交幂等和部分计划中的覆盖项为 **Initial / Proposed Test Design**，不应被误读为当前测试 API 或实现细节。
+
 ## 1. Test layers
 
 | Layer | Scope | Main purpose |
@@ -100,7 +102,7 @@
 
 ## 6. Mini Program Validation
 
-实现后，以真实 API + Demo Session 手动验收 7 个 P0 页面：
+在初始计划中，以下项目用于真实 API 手动验收 7 个 P0 页面；当前 V1 实际使用 `X-Demo-User-Id` 演示请求上下文，而非 Demo Session：
 
 - 首页按待办优先级路由；
 - 包裹列表可在 10–20 件场景筛选、多选且保留滚动位置；
@@ -130,4 +132,3 @@
 - [ ] 7 个 P0 页面以真实 API 而非 Prototype 静态数据运行；
 - [ ] Mock Ops 不可被普通用户会话调用；
 - [ ] 用户可见状态与错误均为中文。
-

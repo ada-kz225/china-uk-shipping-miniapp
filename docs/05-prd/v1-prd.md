@@ -6,7 +6,7 @@
 | --- | --- |
 | Product Name | 中英集运小程序 |
 | Version | V1.0 |
-| Status | MVP Scope 已冻结，待 Prototype / Development |
+| Status | **V1 Completed**；本 PRD 保留为已实现版本的需求与验收基线。 |
 | Target Release | Portfolio MVP |
 | Primary User | 在英国、周期性购买多个中国电商商品并需要集运的中国留学生个人用户 |
 | Product Goal | 让用户自助完成包裹到仓确认、选择合箱、创建转运单、查看报价并模拟付款、确认离仓及追踪至签收，减少常规状态查询对人工沟通的依赖。 |
@@ -1238,8 +1238,8 @@ Technical Error 是系统读写失败；Business Exception 是业务流程中可
 - [x] Business Rules 与 Backend / Ops 约束已列明；
 - [x] Happy Path 与 Exception Path 验收场景已定义；
 - [x] 模拟依赖边界已明确；
-- [ ] 可点击 Prototype 已完成；
-- [ ] Development 前评审已完成。
+- [x] 可点击 Prototype 已完成并已冻结；
+- [x] Technical Design、Development 与最终验收已完成；
 
 ---
 

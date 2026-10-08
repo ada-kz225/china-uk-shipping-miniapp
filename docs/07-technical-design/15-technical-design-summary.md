@@ -1,19 +1,21 @@
 # Technical Design Summary
 
+> 本文汇总 V1 的技术设计与其当前实现状态。项目现为 **V1 Completed**；初始计划中未落地的具体 contract 已在对应章节标记为 **Initial / Proposed Design**，当前实现以代码为准。
+
 ## 1. 推荐技术栈
 
 - 微信原生小程序 + TypeScript；
 - Node.js 22+ + TypeScript + Fastify；
 - Zod 输入校验；
-- SQLite + Drizzle ORM / SQL migration；
+- SQLite + `better-sqlite3` 直接 SQL access / SQL migration；
 - Vitest + Fastify API tests；
-- Seed Script + 受保护的 Mock Ops Command API。
+- Seed Script + 受保护的单事件 Mock Ops routes。
 
 该方案是面向单人 Portfolio MVP 的模块化单体：足以实现真实核心规则，又不引入未被范围需要支撑的基础设施。
 
 ## 2. Overall Architecture
 
-小程序通过 REST API 访问服务端。服务端依次完成 Session、归属、输入、领域规则和事务校验，再持久化到 SQLite。Mock Ops 只作为外部事实的模拟来源，使用同一服务层推进状态。中文 presenter 在 API DTO 层将内部状态映射为用户文案。
+小程序通过 REST API 访问服务端。当前开发 / Demo 环境使用 `X-Demo-User-Id` 提供演示身份；服务端随后完成归属、输入、领域规则和事务校验，再持久化到 SQLite。Mock Ops 只作为外部事实的模拟来源，使用同一服务层推进状态。中文 presenter 在 API DTO 层将内部状态映射为用户文案。
 
 ## 3. Core Data Model
 
@@ -26,7 +28,7 @@
 - `exceptions`：阻断、下一步与恢复目标；
 - `audit_logs`：关键业务事实的内部追溯。
 
-数据库以唯一索引、部分唯一索引、外键、事务与 version 防止重复预报、重复锁定和并发覆盖。
+数据库以唯一索引、部分唯一索引、外键与事务防止重复预报和重复锁定；实体保留 `version` 字段，当前 V1 未实现完整的客户端乐观锁协议。
 
 ## 4. API Modules
 
@@ -51,7 +53,7 @@
 
 ## 6. Mock Ops 机制
 
-Seed 提供主路径、状态展示和异常场景。内部 Command API 只在本地 / Demo 环境开放、需要独立密钥，并调用真实服务方法。它可模拟仓库收货、匹配、称重、报价、付款结果、出库、运输事件、异常与解决，但不能直接改表或跳过闸门。
+Seed 提供一组固定的状态展示与异常数据（19 件 Package、6 个 Shipment）。内部 Mock Ops routes 只在非生产环境开放、需要独立密钥，并调用真实服务方法。它可模拟仓库收货、匹配、称重、报价、付款结果、出库、运输事件、异常与解决，但不能直接改表或跳过闸门。
 
 ## 7. Testing Strategy
 
@@ -86,7 +88,7 @@ Seed 提供主路径、状态展示和异常场景。内部 Command API 只在�
 | 真实业务规则未验证 | 明确为 Product Assumption；使用 Mock，而不伪装为真实接入。 |
 | 用户将付款误解为出库 | 独立状态、Dispatch 闸门、中文 DTO 和 E2E 断言。 |
 | 并发重复锁定 Package | 提交事务、部分唯一索引、version 和 idempotency key。 |
-| Demo 数据失真或不可复现 | 固定 Seed scenario、Mock source、无真实个人数据。 |
+| Demo 数据失真或不可复现 | 固定 Seed 数据、Mock source、无真实个人数据。 |
 | 单人项目过度工程化 | 模块化单体、SQLite、无微服务 / 消息队列 / 真实 SDK。 |
 | 状态码泄漏到用户界面 | 中央 copy mapper、API contract test、中文 UI review。 |
 
@@ -94,7 +96,7 @@ Seed 提供主路径、状态展示和异常场景。内部 Command API 只在�
 
 | PRD requirement | Domain / Schema | API / service | Page / test |
 | --- | --- | --- | --- |
-| FR-001 仓地址 | User + Warehouse | `GET /warehouse-address` | 首页；地址复制检查。 |
+| FR-001 仓地址 | User + Warehouse | `GET /home` 中的 `warehouse` 聚合字段 | 首页；地址复制检查。 |
 | FR-002 / 003 Package 预报与可见性 | Package、AuditLog | PackageService + Package API | 预报 / 列表 / 详情；去重、归属测试。 |
 | FR-004 / 005 合箱与地址 | Shipment、ShipmentPackage、Address | Draft / submit service | 包裹多选、创建转运单；10 选 8 验收。 |
 | FR-006 锁定与 Reference | Shipment、ShipmentPackage、AuditLog | submit transaction | 创建成功与并发锁定测试。 |
@@ -115,6 +117,6 @@ Seed 提供主路径、状态展示和异常场景。内部 Command API 只在�
 
 ## 11. Readiness
 
-**Ready for Development。**
+**Implemented and validated in V1。**
 
-前提是后续实现遵守本技术设计：Mock 不绕过业务规则、用户可见文案保持中文、Prototype 保持不修改、并在每个业务阶段完成对应自动化与验收测试。
+当前实现遵守的边界是：Mock 不绕过业务规则、用户可见文案保持中文、Prototype 保持独立，并已完成对应自动化与人工验收。未来迭代仍应以代码、测试和新的产品证据共同更新本摘要。

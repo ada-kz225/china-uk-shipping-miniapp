@@ -1,6 +1,8 @@
 # 核心业务服务设计
 
-> 服务层是业务规则的唯一执行入口。Route、Mock Ops、Seed Script 和未来外部 Adapter 都只能调用服务方法；Repository 不对外暴露“任意更新状态”的能力。
+> 服务层是业务规则的唯一执行入口。Route、Mock Ops 和未来外部 Adapter 都只能调用服务方法；Repository 不对外暴露“任意更新状态”的能力。
+
+> **Current V1 implementation note**：本文件的完整方法矩阵保留开发前设计意图；当前 Service 与 Route contract 以 `server/src/services/` 和 `server/src/routes/` 为准。已实现的关键差异是：Seed 以受控的直接 SQL 初始化固定演示状态；Package 预报只接受运单号和商品描述；草稿支持 `removePackage`（单件）；用户仅可取消 `DRAFT`，取消时删除草稿；Shipment 提交不要求 idempotency key；用户付款接口创建 attempt 后立即模拟成功，Mock Ops payment route 才可选择 success / failure。其余服务层状态、归属、事务、锁定、Quote、Dispatch、Tracking 与 Exception 约束为当前实现。
 
 ## 1. Service 调用通则
 
@@ -96,4 +98,3 @@ Payment 成功后不调用 DispatchService；付款状态与实际出库严格�
 | 付款结果 | Payment Attempt → Shipment 状态 → AuditLog。 |
 | 出库 | eligibility → dispatched_at → Shipment `DISPATCHED` → TrackingEvent → AuditLog。 |
 | 异常创建 / 解决 | Exception 记录 → 目标状态 → AuditLog。 |
-

@@ -2,6 +2,8 @@
 
 > V1 没有真实仓库、支付或物流接入。Mock Ops 的职责是模拟**事实来源**，而非跳过真实业务规则。它不属于小程序用户页面，也不构成完整运营后台。
 
+> **Current V1 implementation note**：当前实现采用受 `X-Demo-Ops-Key` 保护的**单事件 HTTP routes**，只在 `NODE_ENV !== production` 时注册；不存在统一的 `/internal/mock-ops/commands` command envelope，也没有 Dev Command Panel。路由定义见 `server/src/routes/mock-packages.ts` 与 `server/src/routes/mock-shipments.ts`。Seed 创建 1 个演示用户、1 个中国仓、19 件 Package、6 个 Shipment、Quote、Payment、Tracking、Exception 与 Audit 数据。
+
 ## 1. 目标
 
 - 让 Demo 能沿真实 Package / Shipment 状态机推进；
@@ -10,13 +12,15 @@
 - 不允许 Seed Script 或 Ops 页面直接更新数据库状态；
 - 防止用户端借 Mock Ops 绕过支付、出库和锁定规则。
 
-## 2. 推荐最简实现
+## 2. Initial / Proposed minimal implementation
+
+本节及后续统一 command payload、`DEMO_OPS_ENABLED` 和 command idempotency 的描述，是开发前的 **Initial / Proposed Design**，未作为当前 V1 的 HTTP contract 实现。当前可调用路径以上方实现说明及 `06-api-design.md` 为准。
 
 采用三层组合，不开发完整 Admin UI：
 
 | 组成 | 形式 | 用途 |
 | --- | --- | --- |
-| Seed Script | `npm run db:seed` | 建立固定 Demo 用户、仓地址、15 件 Package、各阶段 Shipment 和 Exception。 |
+| Seed Script | `npm run db:seed` | **Initial / Proposed**：建立固定 Demo 用户、仓地址、15 件 Package、各阶段 Shipment 和 Exception。当前实现改为 19 件 Package 与 6 个 Shipment。 |
 | Mock Ops Command API | 受保护内部 endpoint | 开发者在本地或受控 Demo 环境推进单个事件。 |
 | 可选 Dev Command Panel | 仅开发环境的极简网页 / 命令行 | 便于演示点击触发命令；不纳入小程序，也不作为 P0 页面。 |
 
@@ -95,4 +99,3 @@
 - TrackingEvent 的 `source` 保留 `MOCK_OPS`，对用户界面不显示为实时承运商数据；
 - Demo 不使用真实姓名、地址、手机号、订单截图、运单或支付记录；
 - Mock 金额仅用于流程演示，不能表示真实报价、税费或服务承诺。
-

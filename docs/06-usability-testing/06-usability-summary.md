@@ -1,6 +1,6 @@
 # Prototype Validation Summary
 
-> 本总结基于 UT01 的一次真实 exploratory usability test 与两项已实施的原型交互优化。样本为 1 名用户，所有结论必须以此范围理解。
+> 本总结基于 UT01 的一次真实 exploratory usability test 与两项已实施的原型交互优化。样本为 1 名用户，所有结论必须以此范围理解。**这是 Prototype 阶段的历史验收记录；Prototype 已冻结，当前项目状态为 V1 Completed。**
 
 ## 1. 已成功完成的核心 Flow
 
@@ -39,7 +39,7 @@ UT01 在没有主持人提示的情况下完成了以下任务：
 
 ## 5. Prototype Readiness
 
-当前状态：**Ready for Technical Design**
+历史阶段结论：**Ready for Technical Design**。当前状态：**V1 Completed**。
 
 UT01 的四项核心任务均可在无提示下完成；两项已观察到的可用性问题均已修复，并在 T1 定向回归中通过。当前没有已知的未解决 Critical / Major 问题，因此 Prototype 可以正式冻结并进入 Technical Design。
 
@@ -55,7 +55,7 @@ UT01 的四项核心任务均可在无提示下完成；两项已观察到的可
 
 ## 7. Future Validation Boundary
 
-Prototype 已可进入 Technical Design，但后续真实产品仍应继续测试：
+Prototype 当时已可进入 Technical Design；V1 现已完成。若产品继续进入真实业务或后续版本，仍应继续测试：
 
 | 后续方向 | 原因 |
 | --- | --- |

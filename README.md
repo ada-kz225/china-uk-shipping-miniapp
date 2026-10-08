@@ -130,7 +130,8 @@ china-uk-shipping-miniapp/
 │   └── tests/                       # Unit、API、E2E 与回归测试
 ├── docs/                            # Research → Definition → Design → Testing 的产品工件
 │   ├── 01-research/ … 07-technical-design/
-│   └── 08-retrospective/            # 作品集复盘与可追溯性说明
+│   ├── 08-retrospective/            # 作品集复盘与可追溯性说明
+│   └── 09-roadmap-and-release-plan.md # V1 完成状态、后续轨道与真实试运行门槛
 ├── prototype/                       # 已冻结的独立低保真可点击原型
 ├── package.json                     # Workspace 命令与发布版本
 └── package-lock.json                # 锁定依赖版本
@@ -213,3 +214,4 @@ npx tsc --project miniprogram/tsconfig.json --noEmit
 - [Usability Testing](docs/06-usability-testing/)
 - [Technical Design](docs/07-technical-design/)
 - [Product Retrospective](docs/08-retrospective/product-retrospective.md)
+- [Roadmap & Release Plan](docs/09-roadmap-and-release-plan.md)

@@ -1,6 +1,6 @@
 # 开发计划
 
-> 按业务闭环推进，而不是先堆完所有页面。每一阶段都以可测试的领域事实为完成条件；不改变已冻结 MVP Scope。
+> **Historical development plan。** 本文记录 V1 开发前的分阶段计划，用于保留交付过程；当前 Phase 0–8 均已完成，项目状态为 **V1 Completed**。下文的“Plan / Definition of Done”是当时的计划与验收目标，不应被理解为仍待开发的能力。当前实现以代码、README 与 `09-roadmap-and-release-plan.md` 为准。
 
 ## Phase 0：项目初始化
 
@@ -109,4 +109,3 @@ prototype/         # 已冻结的独立交互原型，不被生产代码引用
 - Phase 4 的成功 Payment 是 Phase 5 Dispatch 的前置；
 - Phase 6 可在 Phase 4/5 的服务完成后接入，但需在 Phase 8 前覆盖全部关键路径；
 - 不在任何阶段增加 P1 地址簿、通知、照片凭据、服务偏好、优惠券、积分或真实第三方接入。
-

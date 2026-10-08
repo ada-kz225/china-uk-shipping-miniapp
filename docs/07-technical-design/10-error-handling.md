@@ -2,6 +2,8 @@
 
 > 技术错误、业务校验错误和业务 Exception 是三类不同事物。前两类不改变领域状态；只有可识别的业务事实才可创建 Exception。
 
+> **Current V1 implementation note**：当前 Fastify error handler 返回 `{ error: { code, message, fieldErrors? } }`，不返回 `meta.requestId`。当前 V1 路由主要使用 400、403、404、409 与 500；未知服务端错误统一为 `INTERNAL_ERROR` / “服务暂时不可用，请稍后重试。”。下文中 401、422、429、503、request ID，以及通用提交 idempotency 的描述属于 **Initial / Proposed Error Design**，而非当前路由 contract。
+
 ## 1. Error taxonomy
 
 | Type | Meaning | Entity state | User experience | Example |
@@ -84,4 +86,3 @@ Error middleware 和 DTO presenter 负责：
 - [ ] Exception 一定关联具体实体并含五段中文内容；
 - [ ] 付款失败后没有出库时间、离仓事件或运输时间线；
 - [ ] 所有错误、Toast、Modal 与表单提示均为中文。
-

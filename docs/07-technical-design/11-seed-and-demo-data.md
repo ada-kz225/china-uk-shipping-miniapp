@@ -2,7 +2,11 @@
 
 > Demo 数据用于复现 Prototype、PRD Scenario A/B 和开发测试；不代表真实仓库、真实价格、真实物流或真实客户数据。
 
-## 1. Seed principles
+> **Current V1 implementation note**：`npm run db:reset` 后运行 `npm run db:seed` 会写入一组固定 Demo 数据：1 个演示用户、1 个中国仓、**19 件 Package**（1 件已预报、1 件待确认、10 件可合箱、6 件已加入转运、1 件异常）、**6 个 Shipment**（仓库处理中、待付款、已付款待出库、国际运输中、已签收、异常），以及相应的地址、Quote、Payment、Tracking Event、Exception 和 Audit Log。当前脚本不接受 scenario 参数；实现位置为 `server/src/db/seed.ts`。
+
+> 下文的多 scenario、15 件 Package、以及“Seed 只经 Event / Service 工厂写入”的描述是 **Initial / Proposed Design**，保留用于说明设计意图，不是当前 Seed 实现的事实。
+
+## 1. Seed principles（Initial / Proposed）
 
 - 使用匿名 Demo 用户、虚构地址、虚构运单和模拟金额；
 - 每条记录的状态必须能由定义的状态机合法产生；
@@ -10,7 +14,7 @@
 - 不通过直接写最终状态绕过服务规则：Seed 可使用受控的领域事件工厂 / Mock Ops command；
 - 每次执行可重置为固定场景，便于复测与截图演示。
 
-## 2. Demo scenarios
+## 2. Demo scenarios（Initial / Proposed）
 
 | Scenario | Purpose | Data boundary |
 | --- | --- | --- |
@@ -20,7 +24,7 @@
 
 Demo 用户的切换仅用于本地开发会话，不是用户端功能。
 
-## 3. Primary Journey Package Set
+## 3. Primary Journey Package Set（Initial / Proposed）
 
 该场景恰好包含 15 件 Package，覆盖 10–20 件盘点的重点交互：
 
@@ -34,7 +38,7 @@ Demo 用户的切换仅用于本地开发会话，不是用户端功能。
 
 每件记录只含模拟商品摘要、脱敏模拟运单号、状态和最小事件。Demo 金额、时间和地址均为虚构。
 
-## 4. Shipment Gallery
+## 4. Shipment Gallery（Initial / Proposed）
 
 使用独立 Scenario 用户建立如下 Shipment，确保每张均有独立关联 Package：
 
@@ -49,7 +53,7 @@ Demo 用户的切换仅用于本地开发会话，不是用户端功能。
 
 状态展示用中文；数据库保留对应内部 code。Quote 金额应标注为模拟示例，不声明真实计费规则。
 
-## 5. Seed Procedure
+## 5. Seed Procedure（Initial / Proposed）
 
 推荐脚本：
 
@@ -63,7 +67,7 @@ Demo 用户的切换仅用于本地开发会话，不是用户端功能。
 
 脚本执行中通过同一 Event / Service 工厂建立状态、TrackingEvent、Exception 与 AuditLog；迁移脚本负责表结构，Seed 不直接伪造不可达状态。
 
-## 6. Acceptance Scenario Fixture
+## 6. Acceptance Scenario Fixture（Initial / Proposed）
 
 PRD 的主验收路径应可用同一 fixture 复现：
 
@@ -78,9 +82,8 @@ PRD 的主验收路径应可用同一 fixture 复现：
 
 异常 fixture 至少验证：创建异常会阻断下一步，用户不能自行解决，Ops Resolve 后只恢复至预先记录的正常状态。
 
-## 7. Data Hygiene
+## 7. Data Hygiene（Initial / Proposed）
 
 - 所有手机号、地址、订单截图、运单号、参考号、金额与时间均为示例；
 - 不向公开仓库提交本地数据库文件、用户上传文件或 token；
 - 在 README 中说明哪些数据为 Mock，避免观者误认为系统连接真实物流或支付服务。
-

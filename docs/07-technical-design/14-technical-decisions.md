@@ -25,7 +25,7 @@
 
 ## TD-004：状态变化必须经 Service / Event，不直接更新数据表
 
-**Decision**：Route、Seed、Mock Ops 与未来 Adapter 均调用领域服务；禁止通用 update endpoint。  
+**Decision**：用户 Route、Mock Ops 与未来 Adapter 均调用领域服务；禁止通用 update endpoint。当前 Seed 为可重复的演示初始化，使用受控 SQL 写入固定状态数据，不作为用户或运营操作入口。
 **Why**：避免 `PAID_AWAITING_DISPATCH` 被直接改为 `DISPATCHED`，或同一 Package 被重复锁定。  
 **Trade-off**：Demo 事件需要多一层 command；换来可演示、可测试和可追溯的真实规则。  
 **Rejected**：通过管理脚本直接改状态，会绕过 Portfolio MVP 的核心价值。
@@ -63,4 +63,3 @@
 **Decision**：保留 `prototype/` 作为冻结的 HTML 原型，正式代码位于独立小程序与服务端目录。  
 **Why**：Prototype 是任务流验证工具，生产实现需要真实 API、状态和测试；复用静态脚本会带来数据和规则混乱。  
 **Trade-off**：部分交互要重新实现；这是有意的实现分层。  
-

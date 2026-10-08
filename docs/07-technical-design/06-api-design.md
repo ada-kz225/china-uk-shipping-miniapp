@@ -1,8 +1,32 @@
 # REST API 设计
 
-> API 以冻结的 7 个 P0 页面与业务动作为边界。用户端没有 Ops API，用户端也不能提交内部状态码。除登录会话与 Mock Ops 外，所有接口均要求当前用户会话。
+> API 以冻结的 7 个 P0 页面与业务动作为边界。用户端没有 Ops API，用户端也不能提交内部状态码。
 
-## 1. 通用约定
+## 1. Current V1 implementation
+
+**当前实现事实**：路由没有 `/v1` 前缀，也未实现 Demo Session / token endpoint。除 `GET /health` 外，用户 API 通过 `X-Demo-User-Id` 请求头取得演示用户；成功响应使用 `{ "data": ... }`，`GET /packages` 额外返回 `statusCounts`；结构化错误为 `{ "error": { "code", "message", "fieldErrors?" } }`。以下为当前代码的实际接口，而非规划建议。
+
+| Method | Current path | Current V1 purpose / key input |
+| --- | --- | --- |
+| GET | `/health` | 服务与 SQLite 连接健康检查。 |
+| GET | `/home` | 首页聚合待办、当前运输、包裹概览和中国仓信息；没有独立仓地址 endpoint。 |
+| GET | `/packages?filter=all\|inbound\|pending_match\|ready\|in_shipment\|needs_action` | 当前用户的包裹列表、筛选和完整状态计数。 |
+| GET / POST | `/packages/:id` / `/packages` | 包裹详情；预报请求仅接受 `domesticTrackingNumber`、`description`。 |
+| GET / POST | `/shipments` | 当前用户的转运单列表（`scope=active\|history`）；以 `packageIds` 创建草稿。 |
+| GET | `/shipments/:id` | 转运单详情，含地址、Quote、最新 Payment、Timeline 与 active exception。 |
+| POST | `/shipments/:id/packages` | 向草稿加入 `packageIds`。 |
+| DELETE | `/shipments/:id/packages/:packageId` | 从草稿移除一个 Package。 |
+| POST | `/shipments/:id/submit` | 提交草稿；正文为 `address`（收件人、电话、邮编、详细地址）。 |
+| POST | `/shipments/:id/cancel` | 取消草稿并释放关联。 |
+| POST | `/shipments/:id/payments` | 发起模拟付款；要求 `Idempotency-Key`。 |
+
+非生产环境还注册受 `X-Demo-Ops-Key` 保护的单事件 Mock Ops routes：`/internal/mock/packages/:id/{inbound,receive,match,ready,raise-exception,resolve-exception}` 与 `/internal/mock/shipments/:id/{start-processing,record-weight,generate-quote,payment,dispatch,start-international-transit,start-customs-clearance,start-uk-last-mile,mark-delivered,raise-exception,resolve-exception}`。这些接口仅供本地 / Demo 推进模拟外部事实，且均调用 Service Layer。
+
+## 2. Initial / Proposed API design (historical)
+
+以下章节保留设计阶段的候选 API contract，用于说明当时的设计取舍；**它们不是当前 V1 的接口参考**。例如 `/v1/*`、Demo Session token、独立 `/v1/warehouse-address`、订单截图上传、统一 command endpoint、cursor 分页和 Shipment 提交幂等键均未在当前 V1 实现。应以本节“Current V1 implementation”与 `server/src/routes/` 为准。
+
+### 3. 通用约定（Initial / Proposed）
 
 | Item | Decision |
 | --- | --- |
@@ -40,7 +64,7 @@
 
 `message` 和 `fieldErrors.message` 必须是中文。内部 `code` 仅用于客户端分支、日志与测试，不能直接展示。
 
-## 2. Session / Demo Environment
+### 2. Session / Demo Environment（Initial / Proposed）
 
 | Method | Path | Purpose | Request / response | Validation / error |
 | --- | --- | --- | --- | --- |
@@ -49,14 +73,14 @@
 
 这不是新增用户页面或登录产品能力；它只为服务端所有权校验提供开发期身份。
 
-## 3. Home 与 Warehouse
+### 3. Home 与 Warehouse（Initial / Proposed）
 
 | Method | Path | Purpose | Request | Response | Business validation / error |
 | --- | --- | --- | --- | --- | --- |
 | GET | `/v1/home` | 首页聚合待处理、当前转运、包裹概览与仓地址摘要。 | — | action required、current shipment、package counts、warehouse summary。 | 每个子模块可独立失败；不把技术失败变成业务异常。 |
 | GET | `/v1/warehouse-address` | 返回当前用户可复制的中国仓收件信息。 | — | 收件人、个人识别信息、电话、地址、中文说明。 | 仅活动仓可返回；不可用时返回“暂时无法获取中国仓地址，请稍后重试。” |
 
-## 4. Package
+### 4. Package（Initial / Proposed）
 
 | Method | Path | Purpose | Request | Response | Business validation / possible error |
 | --- | --- | --- | --- | --- | --- |
@@ -76,7 +100,7 @@ Package DTO 中的 `displayStatus` 结构：
 }
 ```
 
-## 5. Shipment
+### 5. Shipment（Initial / Proposed）
 
 | Method | Path | Purpose | Request | Response | Business validation / possible error |
 | --- | --- | --- | --- | --- | --- |
@@ -89,7 +113,7 @@ Package DTO 中的 `displayStatus` 结构：
 
 没有用户端“直接改 Package 状态”“直接生成报价”“直接标记出库”的接口。
 
-## 6. Quote / Payment / Tracking / Exception
+### 6. Quote / Payment / Tracking / Exception（Initial / Proposed）
 
 Quote、付款、运输和异常不增加独立用户页面，因此优先随 `GET /v1/shipments/:id` 返回。只保留需要用户主动触发的付款动作：
 
@@ -100,7 +124,7 @@ Quote、付款、运输和异常不增加独立用户页面，因此优先随 `G
 
 Payment adapter 可以异步返回结果；用户端收到 `PAYMENT_PROCESSING` 后轮询详情或在回到前台时刷新。成功时只显示“已付款，等待仓库发出”，绝不自动显示已出库。
 
-## 7. Mock Ops Command API
+### 7. Mock Ops Command API（Initial / Proposed）
 
 | Method | Path | Purpose | Request | Response | Validation |
 | --- | --- | --- | --- | --- | --- |
@@ -110,7 +134,7 @@ Payment adapter 可以异步返回结果；用户端收到 `PAYMENT_PROCESSING` 
 
 该接口不由小程序 UI 调用，也不在发布环境暴露。
 
-## 8. Status and Error Mapping Rules
+### 8. Status and Error Mapping Rules（Initial / Proposed）
 
 - Route 从领域服务返回内部 result / error；
 - Presentation mapper 生成中文 `message`、状态标题、解释和下一步；
@@ -118,7 +142,7 @@ Payment adapter 可以异步返回结果；用户端收到 `PAYMENT_PROCESSING` 
 - 支付、Shipment 提交使用 idempotency key；服务端为同一 key 返回先前结果；
 - 时间线和异常中每条用户可见说明必须为中文，不能回显内部 reason code、数据库错误或外部原始响应。
 
-## 9. API Coverage Check
+### 9. API Coverage Check（Initial / Proposed）
 
 | P0 页面 / 任务 | API support |
 | --- | --- |
@@ -131,4 +155,3 @@ Payment adapter 可以异步返回结果；用户端收到 `PAYMENT_PROCESSING` 
 | Mock 业务推进 | 非用户 API 的受保护 Mock Ops Command |
 
 每个 endpoint 都有页面任务或业务流程承接；没有为形式完整性而添加无使用者的资源接口。
-
