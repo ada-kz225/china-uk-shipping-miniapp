@@ -17,6 +17,10 @@
 3. 称重、报价、付款、实际离仓等关键状态缺乏连续的自助可见性。
 4. 英国末端运输异常时，用户需要知道发生了什么、影响什么以及下一步怎么做。
 
+## V1 Product Goal
+
+V1 聚焦减少用户对持续人工客服沟通的依赖，让用户可以自助完成：Package 确认 → 合箱 → Quote / Payment → 出库确认 → Tracking → Exception → Delivered。
+
 ## 产品过程
 
 ```text
@@ -40,7 +44,7 @@ Research
 | Technical Design | API、SQLite、状态机、Mock Ops、测试与错误处理设计 |
 | Development | 微信原生小程序、Fastify 服务、SQLite、状态约束与测试 |
 
-完整过程文档见 [docs](docs/)。产品复盘见 [Product Retrospective](docs/08-retrospective/product-retrospective.md)。
+完整过程文档见 [docs](docs/)。快速阅读：[Research](docs/01-research/) · [V1 PRD](docs/05-prd/v1-prd.md) · [Usability Testing](docs/06-usability-testing/) · [Product Retrospective](docs/08-retrospective/product-retrospective.md) · [Product Roadmap](docs/09-roadmap-and-release-plan.md)。
 
 ## V1 核心闭环
 
@@ -57,12 +61,111 @@ Research
 → 签收
 ```
 
-关键业务约束：
+## Key Product Decisions / 关键产品决策
 
-- `Package` 与 `Shipment` 是两个独立实体；多个 Package 可组成一个 Shipment。
-- 一个 Package 同时只能属于一个有效 Shipment。
-- “已付款，等待仓库发出”不等于“已从仓库发出”；只有“已签收”才代表完整履约结束。
-- 异常会阻断不合法的后续推进；由模拟运营操作解决后，工作流恢复至记录的原状态。
+- **Multiple Packages → One Shipment**：Package 与 Shipment 是两个独立实体；用户可将多个已就绪包裹组织为一次转运，便于按一次履约决策管理。
+- **仅在 Submit 时锁定 Package**：Draft 阶段仍允许用户调整包裹；提交时才原子锁定，避免同一 Package 同时进入多个有效 Shipment。
+- **Paid ≠ Dispatched**：付款只确认费用已完成，不代表包裹已经离仓；将两个状态分开，避免用户误判履约进度。
+- **Exception 阻塞非法状态推进**：异常发生时不能继续推进后续流程；解决后才恢复到记录的合法状态，避免“看似继续、实际失控”。
+- **Home 优先 Action Required**：首页先呈现异常、待付款、待确认与可合箱事项，帮助用户先判断现在该做什么。
+- **V1 聚焦用户侧核心闭环**：不提前建设完整 Ops、WMS 或真实商业集成，把范围保持在可验证的用户自助信息与决策体验。
+
+## Product Walkthrough / 产品流程展示
+
+以下截图使用演示数据，展示 V1 如何围绕“包裹是否到仓、能否合箱、转运现在到哪一步”组织用户任务。
+
+### 1. Understand｜先知道现在该做什么
+
+这一组解决多个包裹分批到仓时，用户无法快速判断待办、状态和可合箱范围的问题。
+
+**首页 Dashboard**：以“待处理事项”优先，帮助用户先看到现在需要处理什么，而不是从功能入口中自行寻找。
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>待处理事项与当前运输</strong><br />
+      首页将异常、待付款、待确认和可合箱包裹按优先级集中呈现。
+    </td>
+    <td width="50%" valign="top">
+      <strong>包裹概览与仓库信息</strong><br />
+      用户可继续查看各类包裹数量，并复制中国仓地址完成国内下单。
+    </td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshots/01dashboard.PNG" alt="首页 Dashboard：待处理事项与当前运输" width="280" /></td>
+    <td><img src="docs/assets/screenshots/02dashboard.PNG" alt="首页 Dashboard：包裹概览与仓库信息" width="280" /></td>
+  </tr>
+</table>
+
+**Package List**：支持在约 10–20 件 Package 中按状态筛选、盘点到仓情况，并识别哪些包裹可以进入下一步。
+
+<img src="docs/assets/screenshots/03package_list.PNG" alt="Package List：多状态包裹列表与筛选" width="280" />
+
+### 2. Consolidate｜把多个包裹组织成一次转运
+
+这一组解决多包裹合箱时的选择成本，以及“哪些包裹已被纳入本次转运”的不确定性。
+
+**多选合箱**：用户可批量选择可合箱包裹；不可选原因和剩余可合箱包裹提醒降低遗漏风险。
+
+<img src="docs/assets/screenshots/04merge.PNG" alt="多选合箱：已选择数量、未选择提醒与不可选原因" width="280" />
+
+**Shipment Creation**：将多个 Package 明确汇总为一次 Shipment，并在提交前确认英国收货地址和本次转运内容。
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>已选包裹与未选提醒</strong><br />
+      提交前保留可移除操作，并提示尚未加入本次转运的可合箱包裹。
+    </td>
+    <td width="50%" valign="top">
+      <strong>英国地址与提交确认</strong><br />
+      用户完成地址确认后再提交转运单，避免包裹与收货信息脱节。
+    </td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshots/05shipment_creation.PNG" alt="创建转运单：已选包裹与未选提醒" width="280" /></td>
+    <td><img src="docs/assets/screenshots/06shipment_creation.PNG" alt="创建转运单：英国收货地址与提交" width="280" /></td>
+  </tr>
+</table>
+
+### 3. Pay & Fulfil｜确认费用，也确认是否真的离仓
+
+这一组解决最终报价出现后如何判断费用，以及付款后是否已实际进入履约的问题。
+
+**报价与付款反馈**：展示最终重量、计费重量与费用明细，以及付款未完成时的明确反馈，让金额构成和下一步都可理解。
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>转运单列表</strong><br />
+      进行中的转运单按当前状态与下一步集中展示，帮助用户找到待付款的转运单。
+    </td>
+    <td width="50%" valign="top">
+      <strong>报价与付款反馈</strong><br />
+      最终报价呈现重量、费用与付款结果，让用户理解金额构成和当前下一步。
+    </td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshots/07shipment_list.PNG" alt="转运单列表：不同履约状态与下一步" width="280" /></td>
+    <td><img src="docs/assets/screenshots/08quate.PNG" alt="报价与付款反馈：最终报价与付款未完成提示" width="280" /></td>
+  </tr>
+</table>
+
+**已付款，等待仓库发出**：明确说明 Paid ≠ Dispatched；付款成功只代表费用已确认，不代表包裹已经离开仓库。
+
+<img src="docs/assets/screenshots/09paid_awating_dispatch.PNG" alt="已付款，等待仓库发出：付款不等于实际离仓" width="280" />
+
+### 4. Track & Recover｜持续追踪，并在异常时知道怎么做
+
+这一组解决运输状态分散、异常只显示错误却不给出行动指引的问题。
+
+**Shipment Exception / Tracking Timeline**：异常卡回答发生什么、影响什么、需要做什么、当前进度和如何求助；Timeline 将履约阶段连续呈现。
+
+<img src="docs/assets/screenshots/10shipment_exception.PNG" alt="Shipment Exception：异常说明与运输 Timeline" width="280" />
+
+**Delivered**：以签收作为 Package → Shipment → Fulfilment 的履约闭环终点，避免将付款或出库误认为完成。
+
+<img src="docs/assets/screenshots/11shipment_delivered.PNG" alt="Delivered：已签收与完整运输 Timeline" width="280" />
 
 ## V1 功能
 
@@ -74,15 +177,6 @@ Research
 - 阶段级运输 Timeline：出库、国际运输、清关、英国派送、签收；
 - Package / Shipment 异常的影响、下一步、当前进度与支持说明；
 - 仅开发 / 演示环境可用的受保护 Mock Ops，用于产生模拟仓库、付款与物流事件。
-
-## 产品截图（占位）
-
-本仓库不提交包含真实个人信息或真实订单的截图。演示时建议将脱敏截图放入 `docs/assets/screenshots/`，并在此处补充：
-
-- 首页：待办优先级、当前运输、包裹概览与仓库地址；
-- 包裹页：10–20 件包裹的筛选与多选状态；
-- 创建转运单：已选包裹、未选提醒与英国地址；
-- 转运单详情：报价、已付款待出库、Timeline 与异常卡片。
 
 ## 技术架构
 
