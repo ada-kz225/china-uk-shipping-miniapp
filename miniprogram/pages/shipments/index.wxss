@@ -64,9 +64,8 @@
   font-weight: 600;
 }
 
-.status-label {
-  color: #444444;
-  font-size: 25rpx;
+.card-header .status-badge {
+  flex: none;
   text-align: right;
 }
 

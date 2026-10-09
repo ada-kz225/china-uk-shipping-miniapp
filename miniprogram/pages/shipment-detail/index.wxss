@@ -14,7 +14,7 @@
 
 .status-card,
 .information-card {
-  padding: 26rpx 24rpx;
+  padding: 24rpx;
   border-radius: 16rpx;
   background: #ffffff;
 }
@@ -33,12 +33,9 @@
   font-weight: 600;
 }
 
-.status-label {
-  display: block;
+.status-card .status-badge {
+  align-self: flex-start;
   margin-top: 20rpx;
-  color: #1f1f1f;
-  font-size: 31rpx;
-  font-weight: 600;
 }
 
 .status-description {

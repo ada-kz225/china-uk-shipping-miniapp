@@ -4,6 +4,52 @@ page {
   font-size: 32rpx;
 }
 
+button,
+button::after {
+  border-radius: 12rpx;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 6rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.status-badge-neutral {
+  background: #f0f0f0;
+  color: #5a5a5a;
+}
+
+.status-badge-action {
+  background: #fff4dd;
+  color: #8a5a12;
+}
+
+.status-badge-paid {
+  background: #f0effa;
+  color: #594aa2;
+}
+
+.status-badge-progress {
+  background: #eaf2fb;
+  color: #2e6091;
+}
+
+.status-badge-completed {
+  background: #eaf5ed;
+  color: #2e6a40;
+}
+
+.status-badge-exception {
+  background: #f9ece9;
+  color: #9f3629;
+}
+
 .phase-zero-page {
   box-sizing: border-box;
   min-height: 100vh;

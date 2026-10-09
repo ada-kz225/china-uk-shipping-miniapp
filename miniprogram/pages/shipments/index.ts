@@ -2,13 +2,15 @@ import { ApiError } from "../../services/api";
 import {
   formatShipmentDate,
   listShipments,
-  type ShipmentDto,
-  type ShipmentScope
+  ShipmentDto,
+  ShipmentScope
 } from "../../services/shipments";
+import { shipmentStatusTone, StatusTone } from "../../services/status-ui";
 
 type ShipmentCard = ShipmentDto & {
   updatedAtDisplay: string;
   referenceDisplay: string;
+  statusTone: StatusTone;
 };
 
 Page({
@@ -54,7 +56,7 @@ Page({
       this.setData({
         shipments: [],
         errorMessage:
-          error instanceof ApiError ? error.message : "加载失败，请重试。"
+          error instanceof ApiError ? error.message : "暂时无法加载转运单，请重试。"
       });
     } finally {
       this.setData({ isLoading: false });
@@ -66,6 +68,7 @@ function toShipmentCard(item: ShipmentDto): ShipmentCard {
   return {
     ...item,
     updatedAtDisplay: formatShipmentDate(item.updatedAt),
-    referenceDisplay: item.reference ?? "草稿转运"
+    referenceDisplay: item.reference ?? "草稿转运",
+    statusTone: shipmentStatusTone(item.status)
   };
 }

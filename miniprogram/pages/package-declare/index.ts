@@ -25,7 +25,7 @@ Page({
     const description = this.data.description.trim();
 
     if (!domesticTrackingNumber) {
-      wx.showToast({ title: "请填写国内运单号。", icon: "none" });
+      wx.showToast({ title: "请填写国内快递单号。", icon: "none" });
       return;
     }
 
@@ -50,7 +50,7 @@ Page({
         title:
           error instanceof ApiError
             ? error.message
-            : "暂未提交成功，请重试。",
+            : "提交失败，请重试。",
         icon: "none"
       });
     } finally {

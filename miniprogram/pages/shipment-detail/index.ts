@@ -3,8 +3,9 @@ import {
   formatShipmentDate,
   getShipment,
   simulateShipmentPayment,
-  type ShipmentDto
+  ShipmentDto
 } from "../../services/shipments";
+import { shipmentStatusTone, StatusTone } from "../../services/status-ui";
 
 type ShipmentDetail = ShipmentDto & {
   referenceDisplay: string;
@@ -16,6 +17,7 @@ type ShipmentDetail = ShipmentDto & {
     description: string;
     occurredAtDisplay: string;
   }>;
+  statusTone: StatusTone;
 };
 
 Page({
@@ -76,10 +78,10 @@ Page({
       await wait(350);
       const shipment = await simulateShipmentPayment(this.data.shipmentId);
       this.setData({ shipment: toShipmentDetail(shipment) });
-      wx.showToast({ title: "模拟付款成功", icon: "success" });
+      wx.showToast({ title: "付款成功", icon: "success" });
     } catch (error) {
       wx.showToast({
-        title: error instanceof ApiError ? error.message : "付款未完成，请重新尝试。",
+        title: error instanceof ApiError ? error.message : "付款失败，请重试。",
         icon: "none"
       });
     } finally {
@@ -101,7 +103,7 @@ Page({
       this.setData({
         shipment: null,
         errorMessage:
-          error instanceof ApiError ? error.message : "加载失败，请重试。"
+          error instanceof ApiError ? error.message : "暂时无法加载转运单详情，请重试。"
       });
     } finally {
       this.setData({ isLoading: false });
@@ -126,7 +128,8 @@ function toShipmentDetail(item: ShipmentDto): ShipmentDetail {
       title: event.title,
       description: event.description,
       occurredAtDisplay: formatShipmentDate(event.occurredAt)
-    }))
+    })),
+    statusTone: shipmentStatusTone(item.status)
   };
 }
 

@@ -89,7 +89,14 @@
 
 .package-card-disabled {
   background: #f2f2f2;
-  opacity: 0.62;
+  border: 1rpx solid #e2e2e2;
+}
+
+.package-card-disabled .tracking-number,
+.package-card-disabled .package-description,
+.package-card-disabled .card-meta,
+.package-card-disabled .relation-note {
+  color: #666666;
 }
 
 .card-header {
@@ -136,10 +143,8 @@
   word-break: break-all;
 }
 
-.status-label {
+.card-header .status-badge {
   flex: none;
-  color: #3a3a3a;
-  font-size: 25rpx;
 }
 
 .package-description {
@@ -175,7 +180,10 @@
 
 .unavailable-note {
   display: block;
-  margin-top: 16rpx;
+  margin-top: 18rpx;
+  padding: 10rpx 12rpx;
+  border-radius: 8rpx;
+  background: #f9ece9;
   color: #9f3629;
   font-size: 25rpx;
 }

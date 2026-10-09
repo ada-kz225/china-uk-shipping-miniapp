@@ -1,5 +1,5 @@
 <view class="detail-page">
-  <view wx:if="{{isLoading}}" class="feedback-state">正在加载。</view>
+  <view wx:if="{{isLoading}}" class="feedback-state">正在加载转运单详情…</view>
   <view wx:elif="{{errorMessage}}" class="feedback-state">
     <text>{{errorMessage}}</text>
     <button class="secondary-button" bindtap="onRetryTap">重新加载</button>
@@ -9,7 +9,7 @@
     <view class="status-card">
       <text class="field-label">转运单号</text>
       <text class="reference">{{shipment.referenceDisplay}}</text>
-      <text class="status-label">{{shipment.statusLabel}}</text>
+      <text class="status-badge status-badge-{{shipment.statusTone}}">{{shipment.statusLabel}}</text>
       <text class="status-description">{{shipment.statusDescription}}</text>
       <view class="next-action">
         <text class="field-label">下一步</text>
@@ -104,7 +104,7 @@
         disabled="{{isPaying}}"
         bindtap="onPaymentTap"
       >
-        {{isPaying ? '付款处理中' : '确认并模拟付款'}}
+        {{isPaying ? '付款处理中' : '确认付款（演示）'}}
       </button>
       <view wx:if="{{shipment.status === 'PAID_AWAITING_DISPATCH'}}" class="payment-note payment-note-success">
         <text>费用已支付成功，仓库正在安排出库。</text>

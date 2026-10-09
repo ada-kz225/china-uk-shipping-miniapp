@@ -2,13 +2,15 @@ import { ApiError } from "../../services/api";
 import {
   formatPackageDate,
   getPackage,
-  type PackageDto
+  PackageDto
 } from "../../services/packages";
+import { packageStatusTone, StatusTone } from "../../services/status-ui";
 
 type PackageDetail = PackageDto & {
   arrivedAtDisplay: string;
   weightDisplay: string;
   createdAtDisplay: string;
+  statusTone: StatusTone;
 };
 
 Page({
@@ -56,7 +58,7 @@ Page({
         errorMessage:
           error instanceof ApiError
             ? error.message
-            : "加载失败，请重试。"
+            : "暂时无法加载包裹详情，请重试。"
       });
     } finally {
       this.setData({ isLoading: false });
@@ -73,6 +75,7 @@ function toPackageDetail(item: PackageDto): PackageDetail {
     ...item,
     arrivedAtDisplay: formatPackageDate(item.arrivedAt),
     weightDisplay: item.weightG === null ? "" : item.weightG + " 克",
-    createdAtDisplay: formatPackageDate(item.createdAt)
+    createdAtDisplay: formatPackageDate(item.createdAt),
+    statusTone: packageStatusTone(item.status)
   };
 }

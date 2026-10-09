@@ -1,6 +1,9 @@
 <view class="create-page">
-  <view wx:if="{{isLoading}}" class="feedback-state">正在加载。</view>
-  <view wx:elif="{{errorMessage}}" class="feedback-state">{{errorMessage}}</view>
+  <view wx:if="{{isLoading}}" class="feedback-state">正在加载本次转运…</view>
+  <view wx:elif="{{errorMessage}}" class="feedback-state">
+    <text>{{errorMessage}}</text>
+    <button class="secondary-button" bindtap="onRetryTap">重新加载</button>
+  </view>
 
   <view wx:elif="{{shipment}}" class="create-content">
     <view class="summary-card">
@@ -24,9 +27,11 @@
         <button
           class="remove-button"
           data-id="{{item.id}}"
+          loading="{{isRemovingPackage}}"
+          disabled="{{isSubmitting || isRemovingPackage}}"
           bindtap="onRemovePackageTap"
         >
-          移除
+          {{isRemovingPackage ? '正在移除' : '移除'}}
         </button>
       </view>
     </view>
@@ -56,7 +61,7 @@
       <text>提交后，已选包裹将加入本次转运单，仓库将开始处理。</text>
     </view>
 
-    <button class="cancel-button" bindtap="onCancelDraftTap">取消本次转运</button>
+    <button class="cancel-button" disabled="{{isSubmitting || isRemovingPackage}}" bindtap="onCancelDraftTap">取消本次转运</button>
     <button
       class="submit-button"
       loading="{{isSubmitting}}"

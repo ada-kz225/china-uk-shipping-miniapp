@@ -84,9 +84,15 @@
   flex: none;
   margin: 0;
   padding: 0 8rpx;
+  border: 0;
   color: #9f3629;
   background: transparent;
   font-size: 27rpx;
+}
+
+.remove-button::after,
+.cancel-button::after {
+  border: 0;
 }
 
 .field-group {
@@ -127,6 +133,7 @@
 
 .cancel-button {
   margin: 0;
+  border: 0;
   background: transparent;
   color: #9f3629;
   font-size: 28rpx;
@@ -145,4 +152,13 @@
   color: #666666;
   font-size: 28rpx;
   text-align: center;
+}
+
+.feedback-state .secondary-button {
+  margin: 24rpx auto 0;
+  padding: 0 24rpx;
+  background: #ffffff;
+  color: #333333;
+  font-size: 28rpx;
+  line-height: 64rpx;
 }

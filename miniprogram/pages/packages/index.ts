@@ -2,11 +2,12 @@ import { ApiError } from "../../services/api";
 import {
   formatPackageDate,
   listPackages,
-  type PackageDto,
-  type PackageFilter,
-  type PackageStatusCounts
+  PackageDto,
+  PackageFilter,
+  PackageStatusCounts
 } from "../../services/packages";
 import { createShipmentDraft } from "../../services/shipments";
+import { packageStatusTone, StatusTone } from "../../services/status-ui";
 
 type FilterOption = {
   key: PackageFilter;
@@ -16,6 +17,7 @@ type FilterOption = {
 type PackageCard = PackageDto & {
   arrivedAtDisplay: string;
   weightDisplay: string;
+  statusTone: StatusTone;
   isSelected?: boolean;
 };
 
@@ -166,7 +168,7 @@ Page({
         title:
           error instanceof ApiError
             ? error.message
-            : "暂未创建成功，请重试。",
+            : "创建失败，请重试。",
         icon: "none"
       });
     } finally {
@@ -210,7 +212,7 @@ Page({
         errorMessage:
           error instanceof ApiError
             ? error.message
-            : "加载失败，请重试。"
+            : "暂时无法加载包裹，请重试。"
       });
     } finally {
       this.setData({ isLoading: false });
@@ -235,7 +237,8 @@ function toPackageCard(item: PackageDto): PackageCard {
   return {
     ...item,
     arrivedAtDisplay: formatPackageDate(item.arrivedAt),
-    weightDisplay: item.weightG === null ? "" : item.weightG + " 克"
+    weightDisplay: item.weightG === null ? "" : item.weightG + " 克",
+    statusTone: packageStatusTone(item.status)
   };
 }
 
@@ -245,7 +248,7 @@ function createFilters(statusCounts: PackageStatusCounts): FilterOption[] {
     { key: "inbound", label: "待到仓 " + statusCounts.inbound },
     { key: "pending_match", label: "待确认 " + statusCounts.pending_match },
     { key: "ready", label: "可合箱 " + statusCounts.ready },
-    { key: "in_shipment", label: "已转运 " + statusCounts.in_shipment },
+    { key: "in_shipment", label: "已加入转运 " + statusCounts.in_shipment },
     { key: "needs_action", label: "需处理 " + statusCounts.needs_action }
   ];
 }

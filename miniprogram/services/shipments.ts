@@ -1,5 +1,5 @@
 import { apiClient } from "./api";
-import type { PackageDto } from "./packages";
+import { PackageDto } from "./packages";
 
 export type ShipmentScope = "active" | "history";
 

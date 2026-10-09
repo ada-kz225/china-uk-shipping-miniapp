@@ -23,7 +23,7 @@
   </scroll-view>
 
   <view wx:if="{{isLoading}}" class="feedback-state">
-    <text>正在加载。</text>
+    <text>正在加载包裹…</text>
   </view>
 
   <view wx:elif="{{errorMessage}}" class="feedback-state">
@@ -32,8 +32,8 @@
   </view>
 
   <view wx:elif="{{packages.length === 0}}" class="feedback-state">
-    <text wx:if="{{selectedFilter === 'all'}}">暂无包裹。下单后可预报国内运单号。</text>
-    <text wx:else>该状态下暂无包裹。</text>
+    <text wx:if="{{selectedFilter === 'all'}}">暂无包裹。下单后可预报国内快递单号。</text>
+    <text wx:else>该状态下暂无包裹。可切换筛选查看其他包裹。</text>
   </view>
 
   <view wx:else class="package-list">
@@ -51,7 +51,7 @@
           </view>
           <text class="tracking-number">{{item.domesticTrackingNumber}}</text>
         </view>
-        <text class="status-label">{{item.statusLabel}}</text>
+        <text class="status-badge status-badge-{{item.statusTone}}">{{item.statusLabel}}</text>
       </view>
       <text class="package-description">{{item.description}}</text>
       <view class="card-meta">
@@ -59,7 +59,7 @@
         <text wx:if="{{item.weightDisplay}}">重量：{{item.weightDisplay}}</text>
       </view>
       <view wx:if="{{item.shipmentReference}}" class="relation-note">
-        已关联转运单：{{item.shipmentReference}}
+        已加入转运单：{{item.shipmentReference}}
       </view>
       <view wx:if="{{item.activeException}}" class="exception-note">
         {{item.activeException.title}}

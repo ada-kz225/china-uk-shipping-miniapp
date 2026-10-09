@@ -15,16 +15,13 @@
 .status-section,
 .information-section,
 .exception-section {
-  padding: 28rpx 24rpx;
+  padding: 24rpx;
   border-radius: 16rpx;
   background: #ffffff;
 }
 
-.status-label {
-  display: block;
-  color: #1f1f1f;
-  font-size: 38rpx;
-  font-weight: 600;
+.status-section .status-badge {
+  align-self: flex-start;
 }
 
 .status-description {

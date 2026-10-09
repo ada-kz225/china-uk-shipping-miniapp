@@ -21,14 +21,14 @@
     </view>
   </view>
 
-  <view wx:if="{{isLoading}}" class="feedback-state">正在加载。</view>
+  <view wx:if="{{isLoading}}" class="feedback-state">正在加载转运单…</view>
   <view wx:elif="{{errorMessage}}" class="feedback-state">
     <text>{{errorMessage}}</text>
     <button class="secondary-button" bindtap="onRetryTap">重新加载</button>
   </view>
   <view wx:elif="{{shipments.length === 0}}" class="feedback-state">
-    <text wx:if="{{selectedScope === 'active'}}">暂无进行中的转运单。</text>
-    <text wx:else>暂无历史转运单。</text>
+    <text wx:if="{{selectedScope === 'active'}}">暂无进行中的转运单。可在包裹页选择可合箱包裹创建转运单。</text>
+    <text wx:else>暂无历史转运单。完成签收后会显示在这里。</text>
   </view>
 
   <view wx:else class="shipment-list">
@@ -41,7 +41,7 @@
     >
       <view class="card-header">
         <text class="reference">{{item.referenceDisplay}}</text>
-        <text class="status-label">{{item.statusLabel}}</text>
+        <text class="status-badge status-badge-{{item.statusTone}}">{{item.statusLabel}}</text>
       </view>
       <text class="next-action">{{item.nextAction}}</text>
       <view class="card-meta">

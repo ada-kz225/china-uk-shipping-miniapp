@@ -1,6 +1,7 @@
 import { ApiError } from "../../services/api";
-import { getHome, type HomeDto } from "../../services/home";
-import type { PackageFilter } from "../../services/packages";
+import { getHome, HomeDto } from "../../services/home";
+import { PackageFilter } from "../../services/packages";
+import { shipmentStatusTone, StatusTone } from "../../services/status-ui";
 
 type PackageOverviewItem = {
   label: string;
@@ -8,9 +9,15 @@ type PackageOverviewItem = {
   filter: PackageFilter;
 };
 
+type HomeViewModel = Omit<HomeDto, "currentJourney"> & {
+  currentJourney: (NonNullable<HomeDto["currentJourney"]> & {
+    statusTone: StatusTone;
+  }) | null;
+};
+
 Page({
   data: {
-    home: null as HomeDto | null,
+    home: null as HomeViewModel | null,
     packageOverviewItems: [] as PackageOverviewItem[],
     isLoading: false,
     errorMessage: ""
@@ -88,12 +95,20 @@ Page({
     try {
       const home = await getHome();
       this.setData({
-        home,
+        home: {
+          ...home,
+          currentJourney: home.currentJourney
+            ? {
+                ...home.currentJourney,
+                statusTone: shipmentStatusTone(home.currentJourney.status)
+              }
+            : null
+        },
         packageOverviewItems: [
           { label: "待到仓", count: home.packageOverview.inbound, filter: "inbound" },
           { label: "待确认", count: home.packageOverview.pendingMatch, filter: "pending_match" },
           { label: "可合箱", count: home.packageOverview.ready, filter: "ready" },
-          { label: "已转运", count: home.packageOverview.inShipment, filter: "in_shipment" },
+          { label: "已加入转运", count: home.packageOverview.inShipment, filter: "in_shipment" },
           { label: "需处理", count: home.packageOverview.needsAction, filter: "needs_action" }
         ]
       });
@@ -102,7 +117,7 @@ Page({
         home: null,
         packageOverviewItems: [],
         errorMessage:
-          error instanceof ApiError ? error.message : "加载首页失败，请重试。"
+          error instanceof ApiError ? error.message : "暂时无法加载首页，请重试。"
       });
     } finally {
       this.setData({ isLoading: false });

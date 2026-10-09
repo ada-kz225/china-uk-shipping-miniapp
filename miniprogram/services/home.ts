@@ -1,6 +1,6 @@
 import { apiClient } from "./api";
-import type { PackageFilter } from "./packages";
-import type { ShipmentDto } from "./shipments";
+import { PackageFilter } from "./packages";
+import { ShipmentDto } from "./shipments";
 
 export type HomeActionDto = {
   title: string;

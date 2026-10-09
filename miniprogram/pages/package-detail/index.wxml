@@ -1,6 +1,6 @@
 <view class="detail-page">
   <view wx:if="{{isLoading}}" class="feedback-state">
-    <text>正在加载。</text>
+    <text>正在加载包裹详情…</text>
   </view>
 
   <view wx:elif="{{errorMessage}}" class="feedback-state">
@@ -10,7 +10,7 @@
 
   <view wx:elif="{{package}}" class="detail-content">
     <view class="status-section">
-      <text class="status-label">{{package.statusLabel}}</text>
+      <text class="status-badge status-badge-{{package.statusTone}}">{{package.statusLabel}}</text>
       <text class="status-description">{{package.statusDescription}}</text>
       <view class="next-action">
         <text class="section-kicker">下一步</text>

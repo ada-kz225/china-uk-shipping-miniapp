@@ -4,8 +4,8 @@ import {
   getShipment,
   removeShipmentPackage,
   submitShipment,
-  type ShipmentDto,
-  type UKAddressInput
+  ShipmentDto,
+  UKAddressInput
 } from "../../services/shipments";
 
 Page({
@@ -20,6 +20,7 @@ Page({
     } as UKAddressInput,
     isLoading: false,
     isSubmitting: false,
+    isRemovingPackage: false,
     errorMessage: ""
   },
 
@@ -43,28 +44,41 @@ Page({
     });
   },
 
-  async onRemovePackageTap(event: {
+  onRemovePackageTap(event: {
     currentTarget: { dataset: { id: string } };
   }) {
-    if (this.data.isSubmitting) {
+    if (this.data.isSubmitting || this.data.isRemovingPackage) {
       return;
     }
 
-    try {
-      const shipment = await removeShipmentPackage(
-        this.data.shipmentId,
-        event.currentTarget.dataset.id
-      );
-      this.setData({ shipment });
-    } catch (error) {
-      wx.showToast({
-        title:
-          error instanceof ApiError
-            ? error.message
-            : "暂未移除成功，请重试。",
-        icon: "none"
-      });
-    }
+    const packageId = event.currentTarget.dataset.id;
+
+    wx.showModal({
+      title: "移除包裹",
+      content: "移除后，该包裹将恢复为可合箱状态，不会加入本次转运。",
+      confirmText: "确认移除",
+      cancelText: "暂不移除",
+      success: async (result) => {
+        if (!result.confirm) {
+          return;
+        }
+
+        this.setData({ isRemovingPackage: true });
+
+        try {
+          const shipment = await removeShipmentPackage(this.data.shipmentId, packageId);
+          this.setData({ shipment });
+          wx.showToast({ title: "已移除包裹", icon: "success" });
+        } catch (error) {
+          wx.showToast({
+            title: error instanceof ApiError ? error.message : "移除失败，请重试。",
+            icon: "none"
+          });
+        } finally {
+          this.setData({ isRemovingPackage: false });
+        }
+      }
+    });
   },
 
   async onSubmitTap() {
@@ -101,7 +115,7 @@ Page({
         title:
           error instanceof ApiError
             ? error.message
-            : "暂未提交成功，请重试。",
+            : "提交失败，请重试。",
         icon: "none"
       });
     } finally {
@@ -110,6 +124,10 @@ Page({
   },
 
   onCancelDraftTap() {
+    if (this.data.isSubmitting || this.data.isRemovingPackage) {
+      return;
+    }
+
     wx.showModal({
       title: "取消本次转运",
       content: "取消后，本次已选包裹将恢复为可合箱状态。",
@@ -130,12 +148,16 @@ Page({
             title:
               error instanceof ApiError
                 ? error.message
-                : "暂未取消成功，请重试。",
+                : "取消失败，请重试。",
             icon: "none"
           });
         }
       }
     });
+  },
+
+  onRetryTap() {
+    this.loadShipment();
   },
 
   async loadShipment() {
@@ -152,7 +174,7 @@ Page({
       this.setData({
         shipment: null,
         errorMessage:
-          error instanceof ApiError ? error.message : "加载失败，请重试。"
+          error instanceof ApiError ? error.message : "暂时无法加载本次转运，请重试。"
       });
     } finally {
       this.setData({ isLoading: false });
